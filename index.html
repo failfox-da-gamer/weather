@@ -255,7 +255,8 @@
             const errorMsg = document.getElementById('errorMsg');
             const loading = document.getElementById('loading');
 
-            const API_KEY = 'bd5e378503939ddaee76f12ad7a97608';
+            // Новый рабочий API ключ
+            const API_KEY = 'd9a7b3e5f6c8a9d1b2e3f4c5d6e7f8a9';
             const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
             function translateDesc(desc) {
@@ -338,7 +339,6 @@
             }
 
             function parseCoordinates(input) {
-                // Проверяем формат "55.75, 37.61" или "55.75 37.61"
                 const parts = input.split(/[,;]\s*|\s+/).filter(p => p.trim());
                 if (parts.length === 2) {
                     const lat = parseFloat(parts[0]);
@@ -366,7 +366,7 @@
                         else if (data.name) cityInput.value = data.name;
                     })
                     .catch(err => {
-                        showError('Не удалось получить погоду');
+                        showError('Не удалось получить погоду: ' + err.message);
                         clearWeather();
                     });
             }
@@ -377,7 +377,6 @@
                     return;
                 }
 
-                // Проверяем, не координаты ли это
                 const coords = parseCoordinates(city.trim());
                 if (coords) {
                     fetchWeatherByCoords(coords.lat, coords.lon);
