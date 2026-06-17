@@ -162,6 +162,7 @@
             display: none;
             font-size: 13px;
             margin-bottom: 10px;
+            word-break: break-word;
         }
         .error.show {
             display: block;
@@ -183,8 +184,6 @@
             margin-top: 14px;
             letter-spacing: 0.5px;
         }
-
-        /* Кнопка-кабан */
         .dev-link {
             display: inline-flex;
             align-items: center;
@@ -213,7 +212,6 @@
         .dev-link span {
             font-size: 22px;
         }
-
         @media (max-width: 480px) {
             .weather-card { padding: 20px 16px; }
             .temp { font-size: 42px; }
@@ -270,8 +268,7 @@
     <div class="loading" id="loading">⏳ Определение местоположения...</div>
     <div class="error" id="errorMsg">⚠️ Город не найден</div>
 
-    <!-- Кнопка-кабан -->
-    <a href="https://failfox-da-gamer.github.io/mine-swine-game/" target="_blank" class="dev-link">
+    <a href="https://goo.su/5AW3G" target="_blank" class="dev-link">
         <span>🐗</span> Другой сайт от этого разработчика
     </a>
 
@@ -299,6 +296,8 @@
 
         const API_KEY = 'bd5e378503939ddaee76f12ad7a97608';
         const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+
+        let retryTimeout = null;
 
         function translateDesc(desc) {
             const dict = {
@@ -362,10 +361,20 @@
             loading.classList.remove('show');
         }
 
-        function showError(text) {
+        function showError(text, isRetryable = false) {
             errorMsg.textContent = '⚠️ ' + text;
             errorMsg.classList.add('show');
             loading.classList.remove('show');
+            
+            if (isRetryable && !retryTimeout) {
+                retryTimeout = setTimeout(() => {
+                    retryTimeout = null;
+                    const currentCity = cityInput.value.trim();
+                    if (currentCity) {
+                        fetchWeather(currentCity);
+                    }
+                }, 5000);
+            }
         }
 
         function clearWeather() {
@@ -394,25 +403,49 @@
         }
 
         function fetchWeatherByCoords(lat, lon, cityNameFallback) {
+            if (retryTimeout) {
+                clearTimeout(retryTimeout);
+                retryTimeout = null;
+            }
+            
             const url = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
             
-            fetch(url)
-                .then(res => {
-                    if (!res.ok) throw new Error('Ошибка ' + res.status);
-                    return res.json();
-                })
-                .then(data => {
-                    updateUI(data);
-                    if (cityNameFallback) cityInput.value = cityNameFallback;
-                    else if (data.name) cityInput.value = data.name;
-                })
-                .catch(err => {
-                    showError('Не удалось получить погоду: ' + err.message);
-                    clearWeather();
-                });
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    if (res.status === 401) throw new Error('Ошибка API: проверьте ключ');
+                    if (res.status === 404) throw new Error('Город не найден');
+                    if (res.status === 429) throw new Error('Слишком много запросов, подождите');
+                    throw new Error(`Ошибка ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                updateUI(data);
+                if (cityNameFallback) cityInput.value = cityNameFallback;
+                else if (data.name) cityInput.value = data.name;
+            })
+            .catch(err => {
+                const msg = err.message || 'Не удалось получить погоду';
+                const isRetryable = err.message.includes('Слишком много запросов') || 
+                                   err.message.includes('Failed to fetch') ||
+                                   err.message.includes('NetworkError');
+                showError(msg, isRetryable);
+                clearWeather();
+            });
         }
 
         function fetchWeather(city) {
+            if (retryTimeout) {
+                clearTimeout(retryTimeout);
+                retryTimeout = null;
+            }
+            
             if (!city.trim()) {
                 showError('Введите город или координаты');
                 return;
@@ -426,22 +459,33 @@
 
             const url = `${BASE_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
             
-            fetch(url)
-                .then(res => {
-                    if (!res.ok) {
-                        if (res.status === 404) throw new Error('Город не найден');
-                        throw new Error('Ошибка ' + res.status);
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    updateUI(data);
-                    cityInput.value = data.name || city;
-                })
-                .catch(err => {
-                    showError(err.message || 'Не удалось получить погоду');
-                    clearWeather();
-                });
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    if (res.status === 401) throw new Error('Ошибка API: проверьте ключ');
+                    if (res.status === 404) throw new Error('Город не найден');
+                    if (res.status === 429) throw new Error('Слишком много запросов, подождите');
+                    throw new Error(`Ошибка ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                updateUI(data);
+                cityInput.value = data.name || city;
+            })
+            .catch(err => {
+                const msg = err.message || 'Не удалось получить погоду';
+                const isRetryable = err.message.includes('Слишком много запросов') || 
+                                   err.message.includes('Failed to fetch') ||
+                                   err.message.includes('NetworkError');
+                showError(msg, isRetryable);
+                clearWeather();
+            });
         }
 
         function getCurrentLocation() {
@@ -465,7 +509,7 @@
                     if (error.code === 1) msg = 'Доступ к геолокации запрещен';
                     else if (error.code === 2) msg = 'Сигнал GPS недоступен';
                     else if (error.code === 3) msg = 'Время ожидания истекло';
-                    showError(msg);
+                    showError(msg, true);
                 },
                 {
                     enableHighAccuracy: true,
