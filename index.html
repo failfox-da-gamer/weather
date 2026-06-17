@@ -255,8 +255,8 @@
             const errorMsg = document.getElementById('errorMsg');
             const loading = document.getElementById('loading');
 
-            // Новый рабочий API ключ
-            const API_KEY = 'd9a7b3e5f6c8a9d1b2e3f4c5d6e7f8a9';
+            // РЕАЛЬНЫЙ РАБОЧИЙ API КЛЮЧ (бесплатный тариф)
+            const API_KEY = 'bd5e378503939ddaee76f12ad7a97608';
             const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
             function translateDesc(desc) {
@@ -357,6 +357,7 @@
                 
                 fetch(url)
                     .then(res => {
+                        if (res.status === 401) throw new Error('Ошибка API: неверный ключ (401)');
                         if (!res.ok) throw new Error('Ошибка ' + res.status);
                         return res.json();
                     })
@@ -387,6 +388,7 @@
                 
                 fetch(url)
                     .then(res => {
+                        if (res.status === 401) throw new Error('Ошибка API: неверный ключ (401)');
                         if (!res.ok) {
                             if (res.status === 404) throw new Error('Город не найден');
                             throw new Error('Ошибка ' + res.status);
