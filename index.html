@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ряженка 🌤️</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
         body {
             min-height: 100vh;
             background: linear-gradient(145deg, #0b1a2b, #1b3b4f);
@@ -46,15 +41,8 @@
             color: #fff;
             font-size: 14px;
             outline: none;
-            transition: 0.3s;
         }
-        .search-box input::placeholder {
-            color: rgba(255,255,255,0.4);
-        }
-        .search-box input:focus {
-            background: rgba(255,255,255,0.2);
-            box-shadow: 0 0 0 3px rgba(245,197,66,0.2);
-        }
+        .search-box input::placeholder { color: rgba(255,255,255,0.4); }
         .search-box button {
             padding: 12px 20px;
             border-radius: 50px;
@@ -62,55 +50,26 @@
             background: #f5c542;
             color: #1e2f3b;
             font-weight: 700;
-            font-size: 14px;
             cursor: pointer;
             transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(245,197,66,0.25);
-            white-space: nowrap;
         }
-        .search-box button:hover {
-            background: #ffd966;
-            transform: scale(1.03);
-        }
+        .search-box button:hover { background: #ffd966; transform: scale(1.02); }
         .search-box .gps-btn {
             background: #4CAF50;
-            box-shadow: 0 4px 15px rgba(76,175,80,0.25);
             padding: 12px 14px;
             font-size: 18px;
         }
-        .search-box .gps-btn:hover {
-            background: #66bb6a;
-        }
-        .search-hint {
-            font-size: 11px;
-            opacity: 0.3;
-            margin-bottom: 18px;
-            text-align: center;
-            letter-spacing: 0.3px;
-        }
-        .city-name {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
+        .search-box .gps-btn:hover { background: #66bb6a; }
+        .city-name { font-size: 28px; font-weight: 600; margin-bottom: 3px; }
         .weather-main {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin: 10px 0 2px;
         }
-        .temp {
-            font-size: 56px;
-            font-weight: 300;
-            line-height: 1;
-        }
-        .temp-unit {
-            font-size: 24px;
-            opacity: 0.6;
-        }
-        .weather-icon {
-            font-size: 48px;
-        }
+        .temp { font-size: 56px; font-weight: 300; line-height: 1; }
+        .temp-unit { font-size: 24px; opacity: 0.6; }
+        .weather-icon { font-size: 48px; }
         .description {
             font-size: 18px;
             padding-left: 14px;
@@ -127,26 +86,10 @@
             padding: 14px 16px;
             margin-bottom: 16px;
         }
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-        }
-        .detail-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            opacity: 0.4;
-            letter-spacing: 0.8px;
-        }
-        .detail-value {
-            font-size: 18px;
-            font-weight: 500;
-            margin-top: 2px;
-        }
-        .detail-value small {
-            font-size: 12px;
-            opacity: 0.6;
-            margin-left: 3px;
-        }
+        .detail-item { display: flex; flex-direction: column; }
+        .detail-label { font-size: 10px; text-transform: uppercase; opacity: 0.4; letter-spacing: 0.8px; }
+        .detail-value { font-size: 18px; font-weight: 500; margin-top: 2px; }
+        .detail-value small { font-size: 12px; opacity: 0.6; margin-left: 3px; }
         .coord-display {
             font-size: 11px;
             opacity: 0.25;
@@ -162,11 +105,8 @@
             display: none;
             font-size: 13px;
             margin-bottom: 10px;
-            word-break: break-word;
         }
-        .error.show {
-            display: block;
-        }
+        .error.show { display: block; }
         .loading {
             display: none;
             text-align: center;
@@ -174,67 +114,45 @@
             font-size: 13px;
             margin: 8px 0;
         }
-        .loading.show {
-            display: block;
-        }
-        .footer {
-            text-align: center;
-            opacity: 0.15;
-            font-size: 10px;
-            margin-top: 14px;
-            letter-spacing: 0.5px;
-        }
+        .loading.show { display: block; }
+        .footer { text-align: center; opacity: 0.15; font-size: 10px; margin-top: 14px; }
         .dev-link {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             background: rgba(255,255,255,0.06);
-            backdrop-filter: blur(4px);
             padding: 10px 18px;
             border-radius: 50px;
             color: #f0f8ff;
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: 0.3s;
             border: 1px solid rgba(255,255,255,0.06);
             margin-top: 6px;
             width: 100%;
-            text-align: center;
-            justify-content: center;
         }
-        .dev-link:hover {
-            background: rgba(245,197,66,0.15);
-            border-color: #f5c542;
-            transform: scale(1.02);
-        }
-        .dev-link span {
-            font-size: 22px;
-        }
+        .dev-link:hover { background: rgba(245,197,66,0.15); border-color: #f5c542; }
+        .dev-link span { font-size: 22px; }
         @media (max-width: 480px) {
             .weather-card { padding: 20px 16px; }
             .temp { font-size: 42px; }
             .city-name { font-size: 22px; }
             .weather-icon { font-size: 36px; }
-            .search-box input { min-width: 100px; font-size: 13px; padding: 10px 12px; }
-            .search-box button { padding: 10px 14px; font-size: 13px; }
             .details { grid-template-columns: 1fr; gap: 6px; }
-            .dev-link { font-size: 12px; padding: 8px 14px; }
         }
     </style>
 </head>
 <body>
 <div class="weather-card">
     <div class="search-box">
-        <input type="text" id="cityInput" placeholder="Город или координаты" value="Москва">
+        <input type="text" id="cityInput" placeholder="Город" value="Москва">
         <button id="searchBtn">Найти</button>
         <button id="gpsBtn" class="gps-btn" title="Моё местоположение">📍</button>
     </div>
-    <div class="search-hint">Введите город или широту, долготу</div>
 
     <div class="city-name" id="cityName">Москва</div>
-
     <div class="weather-main">
         <div>
             <span class="temp" id="temperature">--</span>
@@ -242,7 +160,6 @@
         </div>
         <div class="weather-icon" id="weatherIcon">🌍</div>
     </div>
-
     <div class="description" id="description">—</div>
 
     <div class="details">
@@ -265,20 +182,17 @@
     </div>
 
     <div class="coord-display" id="coordDisplay">📍 55.7558, 37.6173</div>
-    <div class="loading" id="loading">⏳ Определение местоположения...</div>
-    <div class="error" id="errorMsg">⚠️ Город не найден</div>
+    <div class="loading" id="loading">⏳ Загрузка...</div>
+    <div class="error" id="errorMsg">⚠️ Ошибка</div>
 
     <a href="https://goo.su/5AW3G" target="_blank" class="dev-link">
         <span>🐗</span> Другой сайт от этого разработчика
     </a>
-
-    <div class="footer">Данные от OpenWeatherMap</div>
+    <div class="footer">Данные от Open-Meteo (без ключей)</div>
 </div>
 
 <script>
     (function() {
-        "use strict";
-
         const cityInput = document.getElementById('cityInput');
         const searchBtn = document.getElementById('searchBtn');
         const gpsBtn = document.getElementById('gpsBtn');
@@ -294,226 +208,145 @@
         const errorMsg = document.getElementById('errorMsg');
         const loading = document.getElementById('loading');
 
-        // РАБОЧИЙ API КЛЮЧ (новый, свежий)
-        const API_KEY = '7a3b5c8d9e2f4a6b8c1d3e5f7a9b2c4d';
-        const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
-        
-        // Прокси для обхода CORS (если прямая загрузка не работает)
-        const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
+        // ГЕОКОДИНГ (бесплатный, без ключа)
+        const GEO_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 
-        let retryTimeout = null;
-        let useProxy = false; // автоматически переключимся на прокси при ошибке
+        // ПОГОДА (бесплатно, без ключа)
+        const WEATHER_URL = 'https://api.open-meteo.com/v1/forecast';
 
-        function translateDesc(desc) {
-            const dict = {
-                'clear sky': 'ясно',
-                'few clouds': 'малооблачно',
-                'scattered clouds': 'переменная облачность',
-                'broken clouds': 'облачно',
-                'overcast clouds': 'пасмурно',
-                'shower rain': 'ливень',
-                'rain': 'дождь',
-                'thunderstorm': 'гроза',
-                'snow': 'снег',
-                'mist': 'туман',
-                'smoke': 'дымка',
-                'haze': 'мгла',
-                'dust': 'пыль',
-                'fog': 'туман',
-                'sand': 'песчаная буря',
-                'ash': 'пепел',
-                'squall': 'шквал',
-                'tornado': 'торнадо'
+        // Переводы погоды
+        const weatherCodes = {
+            0: '☀️ ясно',
+            1: '🌤️ малооблачно',
+            2: '⛅ переменная облачность',
+            3: '☁️ пасмурно',
+            45: '🌫️ туман',
+            48: '🌫️ изморозь',
+            51: '🌧️ морось',
+            53: '🌧️ морось',
+            55: '🌧️ морось',
+            61: '🌦️ дождь',
+            63: '🌧️ дождь',
+            65: '🌧️ сильный дождь',
+            71: '🌨️ снег',
+            73: '🌨️ снег',
+            75: '🌨️ сильный снег',
+            80: '🌦️ ливень',
+            81: '🌧️ ливень',
+            82: '⛈️ сильный ливень',
+            95: '⛈️ гроза',
+            96: '⛈️ гроза с градом',
+            99: '⛈️ сильная гроза'
+        };
+
+        function getWeatherDesc(code) {
+            return weatherCodes[code] || `❓ (${code})`;
+        }
+
+        function getEmoji(code) {
+            const map = {
+                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+                45: '🌫️', 48: '🌫️',
+                51: '🌧️', 53: '🌧️', 55: '🌧️',
+                61: '🌦️', 63: '🌧️', 65: '🌧️',
+                71: '🌨️', 73: '🌨️', 75: '🌨️',
+                80: '🌦️', 81: '🌧️', 82: '⛈️',
+                95: '⛈️', 96: '⛈️', 99: '⛈️'
             };
-            return dict[desc.toLowerCase()] || desc;
+            return map[code] || '🌍';
         }
 
-        function getEmoji(icon) {
-            if (!icon) return '🌍';
-            const code = icon.slice(0, 2);
-            const emojis = {
-                '01': '☀️', '02': '⛅', '03': '☁️', '04': '☁️',
-                '09': '🌧️', '10': '🌦️', '11': '⛈️', '13': '❄️', '50': '🌫️'
-            };
-            return emojis[code] || '🌈';
-        }
-
-        function updateUI(data) {
-            cityName.textContent = data.name || 'Неизвестно';
-            
-            if (data.main) {
-                temperature.textContent = Math.round(data.main.temp * 10) / 10;
-                feelsLike.innerHTML = Math.round(data.main.feels_like * 10) / 10 + ' <small>°C</small>';
-                humidity.innerHTML = data.main.humidity + ' <small>%</small>';
-                pressure.innerHTML = data.main.pressure + ' <small>гПа</small>';
-            }
-            
-            if (data.wind) {
-                windSpeed.innerHTML = Math.round(data.wind.speed * 10) / 10 + ' <small>м/с</small>';
-            }
-            
-            if (data.weather && data.weather[0]) {
-                const w = data.weather[0];
-                description.textContent = translateDesc(w.description);
-                weatherIcon.textContent = getEmoji(w.icon);
-            }
-            
-            if (data.coord) {
-                coordDisplay.textContent = `📍 ${data.coord.lat.toFixed(4)}, ${data.coord.lon.toFixed(4)}`;
-            }
-            
-            errorMsg.classList.remove('show');
-            loading.classList.remove('show');
-        }
-
-        function showError(text, isRetryable = false) {
+        function showError(text) {
             errorMsg.textContent = '⚠️ ' + text;
             errorMsg.classList.add('show');
             loading.classList.remove('show');
-            
-            if (isRetryable && !retryTimeout) {
-                retryTimeout = setTimeout(() => {
-                    retryTimeout = null;
-                    const currentCity = cityInput.value.trim();
-                    if (currentCity) {
-                        fetchWeather(currentCity);
-                    }
-                }, 5000);
-            }
         }
 
-        function clearWeather() {
-            temperature.textContent = '--';
-            feelsLike.innerHTML = '-- <small>°C</small>';
-            humidity.innerHTML = '-- <small>%</small>';
-            pressure.innerHTML = '-- <small>гПа</small>';
-            windSpeed.innerHTML = '-- <small>м/с</small>';
-            description.textContent = '—';
-            weatherIcon.textContent = '🌍';
-            cityName.textContent = 'Город';
+        function hideError() {
+            errorMsg.classList.remove('show');
         }
 
-        function parseCoordinates(input) {
-            const parts = input.split(/[,;]\s*|\s+/).filter(p => p.trim());
-            if (parts.length === 2) {
-                const lat = parseFloat(parts[0]);
-                const lon = parseFloat(parts[1]);
-                if (!isNaN(lat) && !isNaN(lon) && 
-                    lat >= -90 && lat <= 90 && 
-                    lon >= -180 && lon <= 180) {
-                    return { lat, lon };
-                }
+        function updateUI(data, cityNameText, lat, lon) {
+            cityName.textContent = cityNameText || 'Неизвестно';
+            coordDisplay.textContent = `📍 ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+
+            if (data.current) {
+                const temp = Math.round(data.current.temperature_2m);
+                temperature.textContent = temp;
+
+                const feels = Math.round(data.current.apparent_temperature);
+                feelsLike.innerHTML = feels + ' <small>°C</small>';
+
+                humidity.innerHTML = data.current.relative_humidity_2m + ' <small>%</small>';
+
+                const wind = Math.round(data.current.wind_speed_10m * 10) / 10;
+                windSpeed.innerHTML = wind + ' <small>м/с</small>';
+
+                pressure.innerHTML = data.current.surface_pressure + ' <small>гПа</small>';
+
+                const code = data.current.weather_code;
+                const desc = getWeatherDesc(code);
+                const parts = desc.split(' ');
+                const emoji = parts[0] || '🌍';
+                const text = parts.slice(1).join(' ') || '—';
+                weatherIcon.textContent = emoji;
+                description.textContent = text;
             }
-            return null;
+
+            hideError();
+            loading.classList.remove('show');
         }
 
-        function fetchWeatherByCoords(lat, lon, cityNameFallback) {
-            if (retryTimeout) {
-                clearTimeout(retryTimeout);
-                retryTimeout = null;
-            }
-            
-            let url = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
-            if (useProxy) {
-                url = PROXY_URL + url;
-            }
-            
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => {
-                if (res.status === 0) throw new Error('Сетевая ошибка (CORS)');
-                if (!res.ok) {
-                    if (res.status === 401) throw new Error('Ошибка API: проверьте ключ');
-                    if (res.status === 404) throw new Error('Город не найден');
-                    if (res.status === 429) throw new Error('Слишком много запросов');
-                    throw new Error(`Ошибка ${res.status}`);
-                }
-                return res.json();
-            })
-            .then(data => {
-                updateUI(data);
-                if (cityNameFallback) cityInput.value = cityNameFallback;
-                else if (data.name) cityInput.value = data.name;
-                // Если через прокси заработало — оставляем его
-                if (useProxy) {
-                    console.log('✅ Работает через прокси');
-                }
-            })
-            .catch(err => {
-                const msg = err.message || 'Не удалось получить погоду';
-                // Если ошибка CORS или сеть — включаем прокси
-                if (msg.includes('CORS') || msg.includes('Network') || msg.includes('Failed to fetch')) {
-                    useProxy = true;
-                    // Повторяем запрос через прокси
-                    fetchWeatherByCoords(lat, lon, cityNameFallback);
-                    return;
-                }
-                const isRetryable = msg.includes('Слишком много запросов') || msg.includes('CORS');
-                showError(msg, isRetryable);
-                clearWeather();
-            });
+        function fetchWeather(lat, lon, cityNameText) {
+            loading.classList.add('show');
+            hideError();
+
+            const url = `${WEATHER_URL}?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto&relative_humidity_2m=1&apparent_temperature=1&wind_speed_10m=1&surface_pressure=1`;
+
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) throw new Error('Ошибка ' + res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    updateUI(data, cityNameText, lat, lon);
+                })
+                .catch(err => {
+                    showError('Не удалось получить погоду: ' + err.message);
+                });
         }
 
-        function fetchWeather(city) {
-            if (retryTimeout) {
-                clearTimeout(retryTimeout);
-                retryTimeout = null;
-            }
-            
+        function fetchCity(city) {
             if (!city.trim()) {
-                showError('Введите город или координаты');
+                showError('Введите город');
                 return;
             }
 
-            const coords = parseCoordinates(city.trim());
-            if (coords) {
-                fetchWeatherByCoords(coords.lat, coords.lon);
-                return;
-            }
+            loading.classList.add('show');
+            hideError();
 
-            let url = `${BASE_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
-            if (useProxy) {
-                url = PROXY_URL + url;
-            }
-            
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => {
-                if (res.status === 0) throw new Error('Сетевая ошибка (CORS)');
-                if (!res.ok) {
-                    if (res.status === 401) throw new Error('Ошибка API: проверьте ключ');
-                    if (res.status === 404) throw new Error('Город не найден');
-                    if (res.status === 429) throw new Error('Слишком много запросов');
-                    throw new Error(`Ошибка ${res.status}`);
-                }
-                return res.json();
-            })
-            .then(data => {
-                updateUI(data);
-                cityInput.value = data.name || city;
-                if (useProxy) {
-                    console.log('✅ Работает через прокси');
-                }
-            })
-            .catch(err => {
-                const msg = err.message || 'Не удалось получить погоду';
-                if (msg.includes('CORS') || msg.includes('Network') || msg.includes('Failed to fetch')) {
-                    useProxy = true;
-                    fetchWeather(city);
-                    return;
-                }
-                const isRetryable = msg.includes('Слишком много запросов') || msg.includes('CORS');
-                showError(msg, isRetryable);
-                clearWeather();
-            });
+            const url = `${GEO_URL}?name=${encodeURIComponent(city.trim())}&count=1&language=ru&format=json`;
+
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) throw new Error('Ошибка геокодинга');
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data.results || data.results.length === 0) {
+                        throw new Error('Город не найден');
+                    }
+                    const result = data.results[0];
+                    const lat = result.latitude;
+                    const lon = result.longitude;
+                    const name = result.name + (result.country ? ', ' + result.country : '');
+                    cityInput.value = name;
+                    fetchWeather(lat, lon, name);
+                })
+                .catch(err => {
+                    showError(err.message || 'Город не найден');
+                    loading.classList.remove('show');
+                });
         }
 
         function getCurrentLocation() {
@@ -523,45 +356,42 @@
             }
 
             loading.classList.add('show');
-            errorMsg.classList.remove('show');
+            hideError();
 
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
-                    fetchWeatherByCoords(lat, lon, `${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+                    fetchWeather(lat, lon, 'Моё местоположение');
                 },
                 function(error) {
                     loading.classList.remove('show');
                     let msg = 'Не удалось определить местоположение';
-                    if (error.code === 1) msg = 'Доступ к геолокации запрещен';
+                    if (error.code === 1) msg = 'Доступ запрещён';
                     else if (error.code === 2) msg = 'Сигнал GPS недоступен';
                     else if (error.code === 3) msg = 'Время ожидания истекло';
-                    showError(msg, true);
+                    showError(msg);
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 60000
-                }
+                { enableHighAccuracy: true, timeout: 10000 }
             );
         }
 
         searchBtn.addEventListener('click', function() {
-            fetchWeather(cityInput.value);
+            fetchCity(cityInput.value);
         });
 
         cityInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                fetchWeather(cityInput.value);
+                fetchCity(cityInput.value);
             }
         });
 
         gpsBtn.addEventListener('click', getCurrentLocation);
 
+        // Автозагрузка
         setTimeout(function() {
-            fetchWeather('Москва');
+            fetchCity('Москва');
         }, 300);
     })();
 </script>
