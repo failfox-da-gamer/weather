@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Ряженка потерялась 🌪️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0b1a2b, #1b3b4f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(16px);
+            border-radius: 50px;
+            padding: 50px 40px 55px;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #f0f8ff;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+            position: relative;
+            z-index: 2;
+        }
+        .tornado {
+            font-size: 120px;
+            line-height: 1;
+            display: block;
+            margin-bottom: 10px;
+            animation: spin 3s linear infinite;
+            filter: drop-shadow(0 0 40px rgba(200, 200, 255, 0.2));
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        h1 {
+            font-size: 72px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f5c542, #ff8a5c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: 4px;
+        }
+        .subtitle {
+            font-size: 22px;
+            font-weight: 300;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+        .description {
+            font-size: 16px;
+            opacity: 0.5;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .dev-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(4px);
+            padding: 14px 32px;
+            border-radius: 60px;
+            color: #f0f8ff;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .dev-link:hover {
+            background: rgba(245,197,66,0.15);
+            border-color: #f5c542;
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 8px 30px rgba(245,197,66,0.15);
+        }
+        .dev-link span {
+            font-size: 28px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            opacity: 0.15;
+            letter-spacing: 0.5px;
+        }
+        /* Вихрь-фон */
+        .bg-tornado {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(200, 200, 255, 0.03) 0%, transparent 60%),
+                        radial-gradient(circle at 70% 80%, rgba(255, 200, 150, 0.03) 0%, transparent 50%);
+            animation: bgSpin 20s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+        @keyframes bgSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(360deg) scale(1.5); }
+        }
+        .floating-particle {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.03);
+            pointer-events: none;
+            z-index: 1;
+            animation: floatUp 8s linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-20vh) rotate(720deg); opacity: 0; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 30px 20px 35px; }
+            h1 { font-size: 48px; }
+            .tornado { font-size: 80px; }
+            .subtitle { font-size: 18px; }
+            .dev-link { font-size: 15px; padding: 12px 24px; }
+            .dev-link span { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Фоновый вихрь -->
+    <div class="bg-tornado"></div>
+
+    <!-- Парящие частицы (имитация вихря) -->
+    <div class="floating-particle" style="width: 8px; height: 8px; left: 10%; animation-delay: 0s;"></div>
+    <div class="floating-particle" style="width: 12px; height: 12px; left: 25%; animation-delay: 2s;"></div>
+    <div class="floating-particle" style="width: 6px; height: 6px; left: 50%; animation-delay: 4s;"></div>
+    <div class="floating-particle" style="width: 10px; height: 10px; left: 75%; animation-delay: 1s;"></div>
+    <div class="floating-particle" style="width: 14px; height: 14px; left: 90%; animation-delay: 3s;"></div>
+    <div class="floating-particle" style="width: 7px; height: 7px; left: 40%; animation-delay: 5s;"></div>
+    <div class="floating-particle" style="width: 9px; height: 9px; left: 60%; animation-delay: 6s;"></div>
+    <div class="floating-particle" style="width: 11px; height: 11px; left: 15%; animation-delay: 7s;"></div>
+
+    <div class="container">
+        <span class="tornado">🌪️</span>
+        <h1>404</h1>
+        <div class="subtitle">Страница улетела в вихре!</div>
+        <div class="description">
+            Похоже, "Ряженка" разлилась, а страница унеслась ветром. 
+            Но ты можешь пережить бурю в другом месте!
+        </div>
+
+        <a href="https://goo.su/5AW3G" target="_blank" class="dev-link">
+            <span>🐗</span> Укрыться в Свиньях-сапёрах
+        </a>
+
+        <div class="footer">🌪️ Ряженка × Свиньи-сапёры</div>
+    </div>
+</body>
+</html>
