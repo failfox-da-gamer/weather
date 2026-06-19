@@ -237,7 +237,6 @@
             loading.classList.add('show');
             errorMsg.classList.remove('show');
 
-            // Используем JSONP для обхода CORS
             const callbackName = 'wttrCallback_' + Date.now();
 
             window[callbackName] = function(data) {
@@ -245,11 +244,15 @@
                 document.body.removeChild(script);
 
                 if (!data || data.error) {
-                    throw new Error(data?.error || 'Нет данных');
+                    showError(data?.error || 'Нет данных');
+                    return;
                 }
 
                 const current = data.current_condition?.[0];
-                if (!current) throw new Error('Нет данных о погоде');
+                if (!current) {
+                    showError('Нет данных о погоде');
+                    return;
+                }
 
                 const area = data.nearest_area?.[0];
                 cityName.textContent = area?.areaName?.[0]?.value || query;
@@ -292,18 +295,21 @@
             script.onerror = function() {
                 delete window[callbackName];
                 document.body.removeChild(script);
-                loading.classList.remove('show');
-                errorMsg.textContent = '⚠️ Не удалось загрузить погоду';
-                errorMsg.classList.add('show');
+                showError('Не удалось загрузить погоду');
             };
             document.body.appendChild(script);
+        }
+
+        function showError(msg) {
+            loading.classList.remove('show');
+            errorMsg.textContent = '⚠️ ' + msg;
+            errorMsg.classList.add('show');
         }
 
         function handleSearch() {
             const city = cityInput.value.trim();
             if (!city) {
-                errorMsg.textContent = '⚠️ Введите город';
-                errorMsg.classList.add('show');
+                showError('Введите город');
                 return;
             }
             fetchWeather(city);
@@ -311,8 +317,7 @@
 
         function getCurrentLocation() {
             if (!navigator.geolocation) {
-                errorMsg.textContent = '⚠️ Браузер не поддерживает геолокацию';
-                errorMsg.classList.add('show');
+                showError('Браузер не поддерживает геолокацию');
                 return;
             }
 
@@ -325,13 +330,11 @@
                     fetchWeather(`${latitude},${longitude}`);
                 },
                 function(err) {
-                    loading.classList.remove('show');
                     let msg = 'Не удалось определить местоположение';
                     if (err.code === 1) msg = 'Доступ к геолокации запрещён';
                     else if (err.code === 2) msg = 'Сигнал GPS недоступен';
                     else if (err.code === 3) msg = 'Время ожидания истекло';
-                    errorMsg.textContent = '⚠️ ' + msg;
-                    errorMsg.classList.add('show');
+                    showError(msg);
                 },
                 { enableHighAccuracy: true, timeout: 10000 }
             );
