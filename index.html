@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ряженка 🌤️</title>
+    <title>Ряженка 🌤️ + Прогноз</title>
     <style>
         * {
             margin: 0;
@@ -19,8 +19,14 @@
             justify-content: center;
             padding: 20px;
         }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
         .weather-card {
-            max-width: 480px;
             width: 100%;
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(16px);
@@ -212,6 +218,54 @@
         .dev-link span {
             font-size: 22px;
         }
+
+        /* Стили для прогноза */
+        .forecast-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .forecast-item {
+            background: rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 14px 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+        .forecast-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+        .forecast-item .day {
+            font-size: 13px;
+            opacity: 0.6;
+            margin-bottom: 4px;
+        }
+        .forecast-item .icon {
+            font-size: 28px;
+        }
+        .forecast-item .temp {
+            font-size: 18px;
+            font-weight: 600;
+            display: block;
+        }
+        .forecast-item .desc {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
         @media (max-width: 480px) {
             .weather-card { padding: 20px 16px; }
             .temp { font-size: 42px; }
@@ -221,58 +275,73 @@
             .search-box button { padding: 10px 14px; font-size: 13px; }
             .details { grid-template-columns: 1fr; gap: 6px; }
             .dev-link { font-size: 12px; padding: 8px 14px; }
+            .forecast-grid { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
+            .forecast-item .temp { font-size: 16px; }
         }
     </style>
 </head>
 <body>
-<div class="weather-card">
-    <div class="search-box">
-        <input type="text" id="cityInput" placeholder="Город или координаты" value="Москва">
-        <button id="searchBtn">Найти</button>
-        <button id="gpsBtn" class="gps-btn" title="Моё местоположение">📍</button>
+<div class="container">
+    <div class="weather-card">
+        <div class="search-box">
+            <input type="text" id="cityInput" placeholder="Город или координаты" value="Москва">
+            <button id="searchBtn">Найти</button>
+            <button id="gpsBtn" class="gps-btn" title="Моё местоположение">📍</button>
+        </div>
+        <div class="search-hint">Введите город или широту, долготу</div>
+
+        <div class="city-name" id="cityName">Москва</div>
+
+        <div class="weather-main">
+            <div>
+                <span class="temp" id="temperature">--</span>
+                <span class="temp-unit">°C</span>
+            </div>
+            <div class="weather-icon" id="weatherIcon">🌍</div>
+        </div>
+
+        <div class="description" id="description">—</div>
+
+        <div class="details">
+            <div class="detail-item">
+                <span class="detail-label">💧 Влажность</span>
+                <span class="detail-value" id="humidity">-- <small>%</small></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">💨 Ветер</span>
+                <span class="detail-value" id="windSpeed">-- <small>м/с</small></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">🌡️ Ощущается</span>
+                <span class="detail-value" id="feelsLike">-- <small>°C</small></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">📊 Давление</span>
+                <span class="detail-value" id="pressure">-- <small>гПа</small></span>
+            </div>
+        </div>
+
+        <div class="coord-display" id="coordDisplay">📍 55.7558, 37.6173</div>
+        <div class="loading" id="loading">⏳ Определение местоположения...</div>
+        <div class="error" id="errorMsg">⚠️ Город не найден</div>
+
+        <a href="https://goo.su/5AW3G" target="_blank" class="dev-link">
+            <span>🐗</span> Другой сайт от этого разработчика
+        </a>
+
+        <div class="footer">Данные от OpenWeatherMap</div>
     </div>
-    <div class="search-hint">Введите город или широту, долготу</div>
 
-    <div class="city-name" id="cityName">Москва</div>
-
-    <div class="weather-main">
-        <div>
-            <span class="temp" id="temperature">--</span>
-            <span class="temp-unit">°C</span>
+    <!-- КАРТОЧКА ПРОГНОЗА -->
+    <div class="weather-card" id="forecastCard">
+        <div class="forecast-title">📅 Прогноз на 5 дней</div>
+        <div class="forecast-grid" id="forecastGrid">
+            <div style="text-align:center; opacity:0.5; grid-column:1/-1; padding:20px 0;">
+                ⏳ Загрузка прогноза...
+            </div>
         </div>
-        <div class="weather-icon" id="weatherIcon">🌍</div>
+        <div class="footer" style="margin-top:14px;">Прогноз от OpenWeatherMap</div>
     </div>
-
-    <div class="description" id="description">—</div>
-
-    <div class="details">
-        <div class="detail-item">
-            <span class="detail-label">💧 Влажность</span>
-            <span class="detail-value" id="humidity">-- <small>%</small></span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">💨 Ветер</span>
-            <span class="detail-value" id="windSpeed">-- <small>м/с</small></span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">🌡️ Ощущается</span>
-            <span class="detail-value" id="feelsLike">-- <small>°C</small></span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">📊 Давление</span>
-            <span class="detail-value" id="pressure">-- <small>гПа</small></span>
-        </div>
-    </div>
-
-    <div class="coord-display" id="coordDisplay">📍 55.7558, 37.6173</div>
-    <div class="loading" id="loading">⏳ Определение местоположения...</div>
-    <div class="error" id="errorMsg">⚠️ Город не найден</div>
-
-    <a href="https://goo.su/5AW3G" target="_blank" class="dev-link">
-        <span>🐗</span> Другой сайт от этого разработчика
-    </a>
-
-    <div class="footer">Данные от OpenWeatherMap</div>
 </div>
 
 <script>
@@ -293,32 +362,23 @@
         const coordDisplay = document.getElementById('coordDisplay');
         const errorMsg = document.getElementById('errorMsg');
         const loading = document.getElementById('loading');
+        const forecastGrid = document.getElementById('forecastGrid');
 
         const API_KEY = 'bd5e378503939ddaee76f12ad7a97608';
         const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+        const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
 
         let retryTimeout = null;
 
         function translateDesc(desc) {
             const dict = {
-                'clear sky': 'ясно',
-                'few clouds': 'малооблачно',
-                'scattered clouds': 'переменная облачность',
-                'broken clouds': 'облачно',
-                'overcast clouds': 'пасмурно',
-                'shower rain': 'ливень',
-                'rain': 'дождь',
-                'thunderstorm': 'гроза',
-                'snow': 'снег',
-                'mist': 'туман',
-                'smoke': 'дымка',
-                'haze': 'мгла',
-                'dust': 'пыль',
-                'fog': 'туман',
-                'sand': 'песчаная буря',
-                'ash': 'пепел',
-                'squall': 'шквал',
-                'tornado': 'торнадо'
+                'clear sky': 'ясно', 'few clouds': 'малооблачно',
+                'scattered clouds': 'переменная облачность', 'broken clouds': 'облачно',
+                'overcast clouds': 'пасмурно', 'shower rain': 'ливень',
+                'rain': 'дождь', 'thunderstorm': 'гроза', 'snow': 'снег',
+                'mist': 'туман', 'smoke': 'дымка', 'haze': 'мгла',
+                'dust': 'пыль', 'fog': 'туман', 'sand': 'песчаная буря',
+                'ash': 'пепел', 'squall': 'шквал', 'tornado': 'торнадо'
             };
             return dict[desc.toLowerCase()] || desc;
         }
@@ -331,6 +391,11 @@
                 '09': '🌧️', '10': '🌦️', '11': '⛈️', '13': '❄️', '50': '🌫️'
             };
             return emojis[code] || '🌈';
+        }
+
+        function formatDate(dt) {
+            const d = new Date(dt * 1000);
+            return d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' });
         }
 
         function updateUI(data) {
@@ -361,6 +426,31 @@
             loading.classList.remove('show');
         }
 
+        function updateForecast(data) {
+            if (!data.list || data.list.length === 0) {
+                forecastGrid.innerHTML = '<div style="text-align:center; opacity:0.5; grid-column:1/-1; padding:20px 0;">❌ Нет данных прогноза</div>';
+                return;
+            }
+
+            // Берём каждый 8-й элемент (каждые 24 часа) — 5 дней
+            const dailyForecasts = data.list.filter((item, index) => index % 8 === 0).slice(0, 5);
+
+            forecastGrid.innerHTML = dailyForecasts.map(item => {
+                const temp = Math.round(item.main.temp);
+                const desc = translateDesc(item.weather[0].description);
+                const icon = getEmoji(item.weather[0].icon);
+                const day = formatDate(item.dt);
+                return `
+                    <div class="forecast-item">
+                        <div class="day">${day}</div>
+                        <div class="icon">${icon}</div>
+                        <span class="temp">${temp}°C</span>
+                        <div class="desc">${desc}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function showError(text, isRetryable = false) {
             errorMsg.textContent = '⚠️ ' + text;
             errorMsg.classList.add('show');
@@ -386,6 +476,7 @@
             description.textContent = '—';
             weatherIcon.textContent = '🌍';
             cityName.textContent = 'Город';
+            forecastGrid.innerHTML = '<div style="text-align:center; opacity:0.5; grid-column:1/-1; padding:20px 0;">⏳ Загрузка прогноза...</div>';
         }
 
         function parseCoordinates(input) {
@@ -408,33 +499,28 @@
                 retryTimeout = null;
             }
             
-            const url = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
-            
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => {
-                if (!res.ok) {
-                    if (res.status === 401) throw new Error('Ошибка API: проверьте ключ');
-                    if (res.status === 404) throw new Error('Город не найден');
-                    if (res.status === 429) throw new Error('Слишком много запросов, подождите');
-                    throw new Error(`Ошибка ${res.status}`);
-                }
-                return res.json();
-            })
-            .then(data => {
-                updateUI(data);
+            // Текущая погода
+            const weatherUrl = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+            // Прогноз
+            const forecastUrl = `${FORECAST_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+
+            Promise.all([
+                fetch(weatherUrl, { headers: { 'Accept': 'application/json' } }),
+                fetch(forecastUrl, { headers: { 'Accept': 'application/json' } })
+            ])
+            .then(responses => Promise.all(responses.map(r => {
+                if (!r.ok) throw new Error(`Ошибка ${r.status}`);
+                return r.json();
+            })))
+            .then(([weatherData, forecastData]) => {
+                updateUI(weatherData);
+                updateForecast(forecastData);
                 if (cityNameFallback) cityInput.value = cityNameFallback;
-                else if (data.name) cityInput.value = data.name;
+                else if (weatherData.name) cityInput.value = weatherData.name;
             })
             .catch(err => {
-                const msg = err.message || 'Не удалось получить погоду';
-                const isRetryable = err.message.includes('Слишком много запросов') || 
-                                   err.message.includes('Failed to fetch') ||
-                                   err.message.includes('NetworkError');
+                const msg = err.message || 'Не удалось получить данные';
+                const isRetryable = msg.includes('Failed to fetch') || msg.includes('NetworkError');
                 showError(msg, isRetryable);
                 clearWeather();
             });
@@ -457,32 +543,25 @@
                 return;
             }
 
-            const url = `${BASE_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
-            
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => {
-                if (!res.ok) {
-                    if (res.status === 401) throw new Error('Ошибка API: проверьте ключ');
-                    if (res.status === 404) throw new Error('Город не найден');
-                    if (res.status === 429) throw new Error('Слишком много запросов, подождите');
-                    throw new Error(`Ошибка ${res.status}`);
-                }
-                return res.json();
-            })
-            .then(data => {
-                updateUI(data);
-                cityInput.value = data.name || city;
+            const weatherUrl = `${BASE_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
+            const forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
+
+            Promise.all([
+                fetch(weatherUrl, { headers: { 'Accept': 'application/json' } }),
+                fetch(forecastUrl, { headers: { 'Accept': 'application/json' } })
+            ])
+            .then(responses => Promise.all(responses.map(r => {
+                if (!r.ok) throw new Error(`Ошибка ${r.status}`);
+                return r.json();
+            })))
+            .then(([weatherData, forecastData]) => {
+                updateUI(weatherData);
+                updateForecast(forecastData);
+                cityInput.value = weatherData.name || city;
             })
             .catch(err => {
-                const msg = err.message || 'Не удалось получить погоду';
-                const isRetryable = err.message.includes('Слишком много запросов') || 
-                                   err.message.includes('Failed to fetch') ||
-                                   err.message.includes('NetworkError');
+                const msg = err.message || 'Не удалось получить данные';
+                const isRetryable = msg.includes('Failed to fetch') || msg.includes('NetworkError');
                 showError(msg, isRetryable);
                 clearWeather();
             });
