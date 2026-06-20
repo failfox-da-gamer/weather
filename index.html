@@ -400,6 +400,17 @@
         let lastWeatherData = null;
         let retryTimeout = null;
 
+        // ===== СЛОВАРЬ КОНТИНЕНТОВ (для фичи "Африка" и др.) =====
+        const CONTINENTS = {
+            'африка': { lat: 8.7832, lon: 34.5085 },
+            'европа': { lat: 48.6909, lon: 9.1406 },
+            'азия': { lat: 34.0479, lon: 100.6197 },
+            'северная америка': { lat: 44.3306, lon: -99.4842 },
+            'южная америка': { lat: -15.7939, lon: -47.8828 },
+            'австралия': { lat: -25.2744, lon: 133.7751 },
+            'антарктида': { lat: -82.8628, lon: 135.0000 }
+        };
+
         // ===== FETCH С ТАЙМАУТОМ (8 сек) =====
         function fetchWithTimeout(url, options = {}, timeout = 8000) {
             return Promise.race([
@@ -469,7 +480,6 @@
             const tempC = data.main?.temp;
             const feelsC = data.main?.feels_like;
             if (tempC !== undefined) {
-                // Показываем с одной десятой долей (как на скриншоте: 28.2°C)
                 temperature.textContent = isCelsius ? tempC.toFixed(1) : (tempC * 9/5 + 32).toFixed(1);
             }
             tempUnit.textContent = isCelsius ? '°C' : '°F';
@@ -481,7 +491,6 @@
             if (data.main?.humidity !== undefined) humidity.innerHTML = data.main.humidity + ' <small>%</small>';
             if (data.main?.pressure !== undefined) pressure.innerHTML = data.main.pressure + ' <small>гПа</small>';
             if (data.wind?.speed !== undefined) {
-                // Ветер показываем с одной десятой (как на скриншоте)
                 windSpeed.innerHTML = data.wind.speed.toFixed(1) + ' <small>м/с</small>';
             }
             if (data.weather && data.weather[0]) {
@@ -565,19 +574,37 @@
             return null;
         }
 
-        // ===== ГЛАВНЫЙ ЗАПРОС =====
+        // ===== ГЛАВНЫЙ ЗАПРОС (ИСПРАВЛЕННЫЙ) =====
         function fetchWeather(city) {
-            if (retryTimeout) { clearTimeout(retryTimeout); retryTimeout = null; }
-            if (!city.trim()) { showError('Введите город или координаты'); return; }
+            // ===== ЖЁСТКИЙ FIX: ИЩЕМ ТОЛЬКО ТО, ЧТО ВВЕЛИ =====
+            if (!city || city.trim() === '') {
+                showError('Введите город или координаты');
+                return;
+            }
 
-            const coords = parseCoordinates(city.trim());
+            // Отключаем геолокацию, если пользователь ввёл текст
+            console.log('🔍 Ищем:', city.trim());
+
+            if (retryTimeout) { clearTimeout(retryTimeout); retryTimeout = null; }
+
+            let query = city.trim();
+            
+            // Проверяем, может это континент?
+            const lowerQuery = query.toLowerCase();
+            if (CONTINENTS[lowerQuery]) {
+                const { lat, lon } = CONTINENTS[lowerQuery];
+                query = `${lat}, ${lon}`;
+                console.log('🌍 Определён континент, координаты:', query);
+            }
+
+            const coords = parseCoordinates(query);
             let weatherUrl, forecastUrl;
             if (coords) {
                 weatherUrl = `${BASE_URL}?lat=${coords.lat}&lon=${coords.lon}&units=metric&lang=ru&appid=${API_KEY}`;
                 forecastUrl = `${FORECAST_URL}?lat=${coords.lat}&lon=${coords.lon}&units=metric&lang=ru&appid=${API_KEY}`;
             } else {
-                weatherUrl = `${BASE_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
-                forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
+                weatherUrl = `${BASE_URL}?q=${encodeURIComponent(query)}&units=metric&lang=ru&appid=${API_KEY}`;
+                forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(query)}&units=metric&lang=ru&appid=${API_KEY}`;
             }
 
             loading.classList.add('show');
@@ -614,7 +641,7 @@
                 });
         }
 
-        // ===== ГЕОЛОКАЦИЯ =====
+        // ===== ГЕОЛОКАЦИЯ (ТОЛЬКО ПО КНОПКЕ) =====
         function getCurrentLocation() {
             if (!navigator.geolocation) { showError('Браузер не поддерживает геолокацию'); return; }
             loading.classList.add('show');
@@ -661,7 +688,18 @@
         // ===== ЗАПУСК =====
         const hasCache = loadCachedData();
         setTimeout(() => {
-            const city = cityInput.value.trim() || 'Москва';
+            // Берём город из кеша или из поля ввода
+            const cached = localStorage.getItem('ryazhenka_weather');
+            let city = 'Москва';
+            if (cached) {
+                try {
+                    const data = JSON.parse(cached);
+                    if (data.city) city = data.city;
+                } catch (e) {}
+            } else if (cityInput.value.trim()) {
+                city = cityInput.value.trim();
+            }
+            cityInput.value = city;
             fetchWeather(city);
         }, hasCache ? 1500 : 200);
 
