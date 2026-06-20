@@ -397,7 +397,7 @@
         const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
 
         let isCelsius = true;
-        let lastWeatherData = null;   // храним сырые данные для пересчёта
+        let lastWeatherData = null;
         let retryTimeout = null;
 
         // ===== FETCH С ТАЙМАУТОМ (8 сек) =====
@@ -460,7 +460,7 @@
         function formatDate(dt) { return new Date(dt * 1000).toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' }); }
         function formatTime(dt) { return new Date(dt * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); }
 
-        // ===== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА =====
+        // ===== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА (с дробями) =====
         function updateUI(data, fromCache = false) {
             if (!data) return;
             lastWeatherData = data;
@@ -469,18 +469,20 @@
             const tempC = data.main?.temp;
             const feelsC = data.main?.feels_like;
             if (tempC !== undefined) {
-                temperature.textContent = isCelsius ? Math.round(tempC) : Math.round(tempC * 9/5 + 32);
+                // Показываем с одной десятой долей (как на скриншоте: 28.2°C)
+                temperature.textContent = isCelsius ? tempC.toFixed(1) : (tempC * 9/5 + 32).toFixed(1);
             }
             tempUnit.textContent = isCelsius ? '°C' : '°F';
 
             if (feelsC !== undefined) {
-                const val = isCelsius ? Math.round(feelsC) : Math.round(feelsC * 9/5 + 32);
+                const val = isCelsius ? feelsC.toFixed(1) : (feelsC * 9/5 + 32).toFixed(1);
                 feelsLike.innerHTML = val + ' <small>' + (isCelsius ? '°C' : '°F') + '</small>';
             }
             if (data.main?.humidity !== undefined) humidity.innerHTML = data.main.humidity + ' <small>%</small>';
             if (data.main?.pressure !== undefined) pressure.innerHTML = data.main.pressure + ' <small>гПа</small>';
             if (data.wind?.speed !== undefined) {
-                windSpeed.innerHTML = Math.round(data.wind.speed * 10) / 10 + ' <small>м/с</small>';
+                // Ветер показываем с одной десятой (как на скриншоте)
+                windSpeed.innerHTML = data.wind.speed.toFixed(1) + ' <small>м/с</small>';
             }
             if (data.weather && data.weather[0]) {
                 const w = data.weather[0];
@@ -508,7 +510,7 @@
 
             const daily = data.list.filter(item => new Date(item.dt * 1000).getHours() === 12).slice(0, 5);
             forecastGrid.innerHTML = daily.map(item => {
-                const temp = isCelsius ? Math.round(item.main.temp) : Math.round(item.main.temp * 9/5 + 32);
+                const temp = isCelsius ? item.main.temp.toFixed(1) : (item.main.temp * 9/5 + 32).toFixed(1);
                 return `
                     <div class="forecast-item">
                         <div class="day">${formatDate(item.dt)}</div>
@@ -521,7 +523,7 @@
 
             const hourly = data.list.slice(0, 8);
             hourlyGrid.innerHTML = hourly.map(item => {
-                const temp = isCelsius ? Math.round(item.main.temp) : Math.round(item.main.temp * 9/5 + 32);
+                const temp = isCelsius ? item.main.temp.toFixed(1) : (item.main.temp * 9/5 + 32).toFixed(1);
                 return `
                     <div class="hourly-item">
                         <div class="time">${formatTime(item.dt)}</div>
@@ -581,7 +583,6 @@
             loading.classList.add('show');
             errorMsg.classList.remove('show');
 
-            // 1. Запрос погоды
             fetchWithTimeout(weatherUrl, { headers: { 'Accept': 'application/json' } }, 8000)
                 .then(r => { if (!r.ok) throw new Error(`Ошибка ${r.status}`); return r.json(); })
                 .then(weatherData => {
@@ -591,7 +592,6 @@
                     cityInput.value = cityNameFromApi;
                     saveToCache(weatherData, null, cityNameFromApi);
 
-                    // 2. Запрос прогноза (отдельно)
                     return fetchWithTimeout(forecastUrl, { headers: { 'Accept': 'application/json' } }, 8000)
                         .then(r => { if (!r.ok) throw new Error(`Ошибка прогноза ${r.status}`); return r.json(); })
                         .then(forecastData => {
@@ -642,7 +642,6 @@
             unitToggle.textContent = isCelsius ? '°F' : '°C';
             if (lastWeatherData) {
                 updateUI(lastWeatherData, cacheBadge.classList.contains('show'));
-                // Перерисовываем прогноз из кеша
                 const cached = localStorage.getItem('ryazhenka_weather');
                 if (cached) {
                     try {
@@ -661,13 +660,11 @@
 
         // ===== ЗАПУСК =====
         const hasCache = loadCachedData();
-        // Если нет кеша — грузим Москву, иначе всё равно обновляем через 2 сек
         setTimeout(() => {
             const city = cityInput.value.trim() || 'Москва';
             fetchWeather(city);
         }, hasCache ? 1500 : 200);
 
-        // Автообновление каждые 5 минут (но только если вкладка активна)
         setInterval(() => {
             if (!document.hidden) {
                 const city = cityInput.value.trim();
@@ -675,7 +672,6 @@
             }
         }, 300000);
 
-        // При возвращении на вкладку — обновить, если данные старые (>5 мин)
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 const cached = localStorage.getItem('ryazhenka_weather');
