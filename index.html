@@ -407,7 +407,7 @@
     </div>
     <div class="search-hint">🌍 Город, океан, континент или координаты</div>
 
-    <!-- Вместо названия города — нейтральная надпись -->
+    <!-- НЕЙТРАЛЬНЫЙ ЗАГОЛОВОК -->
     <div class="city-name" id="cityName">📍 Текущая локация</div>
 
     <div class="weather-main">
@@ -476,8 +476,7 @@
     const cityInput = document.getElementById('cityInput');
     const searchBtn = document.getElementById('searchBtn');
     const gpsBtn = document.getElementById('gpsBtn');
-    const cityNameEl = document.getElementById('cityName');
-    const countryCodeEl = document.getElementById('countryCode'); // не используется
+    const cityNameEl = document.getElementById('cityName'); // нейтральный заголовок
     const temperatureEl = document.getElementById('temperature');
     const weatherIconEl = document.getElementById('weatherIcon');
     const descriptionEl = document.getElementById('description');
@@ -630,9 +629,8 @@
       if (!data) return;
       lastWeatherData = data;
 
-      // НЕ ПОКАЗЫВАЕМ НАЗВАНИЕ ГОРОДА
-      // cityNameEl.textContent = '📍 Текущая локация'; (уже установлено в HTML)
-      // Никакой дополнительной информации о городе не выводим.
+      // НЕ ПОКАЗЫВАЕМ НАЗВАНИЕ ГОРОДА (оставляем нейтральный заголовок)
+      // cityNameEl.textContent = '📍 Текущая локация'; // уже установлено в HTML
 
       const temp = data.main?.temp;
       if (temp !== undefined) {
@@ -824,7 +822,7 @@
         updateUI(weatherData, false);
         updateForecast(forecastData);
         saveToCache(weatherData, forecastData);
-        // Не показываем название города в поле ввода
+        // НЕ ПОКАЗЫВАЕМ ГОРОД В ПОЛЕ ВВОДА
         // cityInput.value = weatherData.name || trimmedCity;
       })
       .catch(error => {
@@ -855,7 +853,7 @@
         updateUI(weatherData, false);
         updateForecast(forecastData);
         saveToCache(weatherData, forecastData);
-        // Не показываем название города
+        // НЕ ПОКАЗЫВАЕМ ГОРОД
         // cityInput.value = weatherData.name || name || `${lat}, ${lon}`;
       })
       .catch(error => {
