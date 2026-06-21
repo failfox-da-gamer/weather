@@ -401,11 +401,11 @@
 <div class="container">
   <div class="weather-card">
     <div class="search-box">
-      <input type="text" id="cityInput" placeholder="Введите город, например, Moscow" value="Moscow">
+      <input type="text" id="cityInput" placeholder="Введите город, океан или континент" value="Moscow">
       <button id="searchBtn">Найти</button>
       <button id="gpsBtn" class="gps-btn" title="Моё местоположение">📍</button>
     </div>
-    <div class="search-hint">Введите город или широту, долготу</div>
+    <div class="search-hint">🌍 Город, океан, континент или координаты</div>
 
     <div class="city-name" id="cityName">Москва <span id="countryCode">RU</span></div>
 
@@ -497,6 +497,51 @@
     const API_KEY = 'bd5e378503939ddaee76f12ad7a97608';
     const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
     const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
+
+    // ===== СЛОВАРИ =====
+    const CITY_TRANSLATE = {
+      'пхеньян': 'Pyongyang',
+      'москва': 'Moscow',
+      'питер': 'Saint Petersburg',
+      'санкт-петербург': 'Saint Petersburg',
+      'киев': 'Kyiv',
+      'минск': 'Minsk',
+      'лондон': 'London',
+      'париж': 'Paris',
+      'берлин': 'Berlin',
+      'нью-йорк': 'New York',
+      'токио': 'Tokyo',
+      'сидней': 'Sydney',
+      'пекин': 'Beijing',
+      'шамхай': 'Shanghai',
+      'дели': 'Delhi',
+      'каир': 'Cairo',
+      'сеул': 'Seoul',
+      'варшава': 'Warsaw',
+      'прага': 'Prague',
+      'будапешт': 'Budapest',
+      'софия': 'Sofia',
+      'бухарест': 'Bucharest',
+      'афины': 'Athens',
+      'стамбул': 'Istanbul',
+      'анапа': 'Anapa'
+    };
+
+    // ===== ОКЕАНЫ И КОНТИНЕНТЫ =====
+    const GEO_OBJECTS = {
+      'тихий океан': { lat: 0, lon: -160, name: 'Тихий океан' },
+      'атлантический океан': { lat: 0, lon: -30, name: 'Атлантический океан' },
+      'индийский океан': { lat: -20, lon: 80, name: 'Индийский океан' },
+      'северный ледовитый океан': { lat: 85, lon: 0, name: 'Северный Ледовитый океан' },
+      'южный океан': { lat: -60, lon: 0, name: 'Южный океан' },
+      'африка': { lat: 8.7832, lon: 34.5085, name: 'Африка' },
+      'европа': { lat: 48.6909, lon: 9.1406, name: 'Европа' },
+      'азия': { lat: 34.0479, lon: 100.6197, name: 'Азия' },
+      'северная америка': { lat: 44.3306, lon: -99.4842, name: 'Северная Америка' },
+      'южная америка': { lat: -15.7939, lon: -47.8828, name: 'Южная Америка' },
+      'австралия': { lat: -25.2744, lon: 133.7751, name: 'Австралия' },
+      'антарктида': { lat: -82.8628, lon: 135.0000, name: 'Антарктида' }
+    };
 
     // --- состояние ---
     let isCelsius = true;
@@ -647,7 +692,6 @@
 
       lastForecastData = data;
 
-      // Прогноз на 5 дней (полдень)
       const daily = data.list.filter(item => new Date(item.dt * 1000).getHours() === 12).slice(0, 5);
       forecastGrid.innerHTML = daily.map(item => {
         const temp = getTempDisplay(item.main.temp);
@@ -661,7 +705,6 @@
         `;
       }).join('');
 
-      // Почасовой прогноз (каждые 3 часа)
       const hourly = data.list.slice(0, 8);
       hourlyGrid.innerHTML = hourly.map(item => {
         const temp = getTempDisplay(item.main.temp);
@@ -716,25 +759,41 @@
     function fetchWeather(city) {
       if (isFetching) return;
       if (!city || city.trim() === '') {
-        showError('Пожалуйста, введите город.');
+        showError('Пожалуйста, введите город, океан или континент.');
         return;
       }
 
-      const trimmedCity = city.trim();
+      let trimmedCity = city.trim().toLowerCase();
       hideError();
       loadingEl.classList.add('show');
       isFetching = true;
 
-      const coords = parseCoordinates(trimmedCity);
-      let weatherUrl, forecastUrl;
-
-      if (coords) {
-        weatherUrl = `${BASE_URL}?lat=${coords.lat}&lon=${coords.lon}&units=metric&lang=ru&appid=${API_KEY}`;
-        forecastUrl = `${FORECAST_URL}?lat=${coords.lat}&lon=${coords.lon}&units=metric&lang=ru&appid=${API_KEY}`;
-      } else {
-        weatherUrl = `${BASE_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
-        forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
+      // ===== ПРОВЕРКА: океан или континент =====
+      if (GEO_OBJECTS[trimmedCity]) {
+        const geo = GEO_OBJECTS[trimmedCity];
+        const coordsStr = `${geo.lat}, ${geo.lon}`;
+        cityInput.value = geo.name;
+        console.log(`🌍 Геообъект: ${geo.name} → координаты ${coordsStr}`);
+        fetchWeatherByCoords(geo.lat, geo.lon, geo.name);
+        return;
       }
+
+      // ===== ПРОВЕРКА: перевод города =====
+      if (CITY_TRANSLATE[trimmedCity]) {
+        trimmedCity = CITY_TRANSLATE[trimmedCity];
+        cityInput.value = trimmedCity;
+        console.log(`🔄 Переведено: ${city} → ${trimmedCity}`);
+      }
+
+      const coords = parseCoordinates(trimmedCity);
+      if (coords) {
+        fetchWeatherByCoords(coords.lat, coords.lon, `${coords.lat}, ${coords.lon}`);
+        return;
+      }
+
+      // ===== Обычный запрос по названию =====
+      const weatherUrl = `${BASE_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
+      const forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
 
       Promise.all([
         fetch(weatherUrl, { headers: { 'Accept': 'application/json' } }),
@@ -756,7 +815,39 @@
       })
       .catch(error => {
         console.warn('Ошибка запроса:', error.message);
-        showError('Не удалось найти город. Проверьте название.');
+        showError('Не удалось найти. Проверьте название или введите координаты.');
+        if (!localStorage.getItem('ryazhenka_weather')) {
+          clearWeatherData();
+        } else {
+          cacheBadge.classList.add('show');
+        }
+      });
+    }
+
+    // ===== ЗАПРОС ПО КООРДИНАТАМ (для океанов и GPS) =====
+    function fetchWeatherByCoords(lat, lon, name) {
+      const weatherUrl = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+      const forecastUrl = `${FORECAST_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+
+      Promise.all([
+        fetch(weatherUrl, { headers: { 'Accept': 'application/json' } }),
+        fetch(forecastUrl, { headers: { 'Accept': 'application/json' } })
+      ])
+      .then(responses => Promise.all(responses.map(r => {
+        if (!r.ok) throw new Error(`Ошибка ${r.status}`);
+        return r.json();
+      })))
+      .then(([weatherData, forecastData]) => {
+        // Если API вернул название — используем его, иначе подставляем имя
+        const displayName = weatherData.name || name || `${lat}, ${lon}`;
+        updateUI(weatherData, false);
+        updateForecast(forecastData);
+        saveToCache(weatherData, forecastData);
+        cityInput.value = displayName;
+      })
+      .catch(error => {
+        console.warn('Ошибка запроса по координатам:', error.message);
+        showError('Не удалось получить погоду в этой точке.');
         if (!localStorage.getItem('ryazhenka_weather')) {
           clearWeatherData();
         } else {
@@ -779,7 +870,7 @@
         function(position) {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
-          fetchWeather(`${lat}, ${lon}`);
+          fetchWeatherByCoords(lat, lon, `Моё местоположение (${lat.toFixed(4)}, ${lon.toFixed(4)})`);
         },
         function(error) {
           loadingEl.classList.remove('show');
@@ -813,7 +904,7 @@
       if (city) {
         fetchWeather(city);
       } else {
-        showError('Введите название города');
+        showError('Введите название');
       }
     }
 
