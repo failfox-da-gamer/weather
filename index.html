@@ -407,7 +407,8 @@
     </div>
     <div class="search-hint">🌍 Город, океан, континент или координаты</div>
 
-    <div class="city-name" id="cityName">-- <span id="countryCode"></span></div>
+    <!-- Вместо названия города — нейтральная надпись -->
+    <div class="city-name" id="cityName">📍 Текущая локация</div>
 
     <div class="weather-main">
       <div class="temp-wrap">
@@ -476,7 +477,7 @@
     const searchBtn = document.getElementById('searchBtn');
     const gpsBtn = document.getElementById('gpsBtn');
     const cityNameEl = document.getElementById('cityName');
-    const countryCodeEl = document.getElementById('countryCode');
+    const countryCodeEl = document.getElementById('countryCode'); // не используется
     const temperatureEl = document.getElementById('temperature');
     const weatherIconEl = document.getElementById('weatherIcon');
     const descriptionEl = document.getElementById('description');
@@ -629,9 +630,9 @@
       if (!data) return;
       lastWeatherData = data;
 
-      const city = data.name || 'Неизвестно';
-      const country = data.sys?.country || '';
-      cityNameEl.innerHTML = `${city} <span id="countryCode">${country}</span>`;
+      // НЕ ПОКАЗЫВАЕМ НАЗВАНИЕ ГОРОДА
+      // cityNameEl.textContent = '📍 Текущая локация'; (уже установлено в HTML)
+      // Никакой дополнительной информации о городе не выводим.
 
       const temp = data.main?.temp;
       if (temp !== undefined) {
@@ -750,7 +751,7 @@
       windSpeedEl.innerHTML = '-- <small>м/с</small>';
       descriptionEl.textContent = '—';
       weatherIconEl.textContent = '🌍';
-      cityNameEl.innerHTML = 'Город <span id="countryCode"></span>';
+      // Название города не трогаем — оставляем нейтральное
       forecastGrid.innerHTML = '<div style="text-align:center; opacity:0.4; grid-column:1/-1; padding:1.2rem 0;">⏳ Загрузка прогноза...</div>';
       hourlyGrid.innerHTML = '<div style="text-align:center; opacity:0.4; padding:1.2rem 0; width:100%;">⏳ Загрузка почасового прогноза...</div>';
     }
@@ -823,7 +824,8 @@
         updateUI(weatherData, false);
         updateForecast(forecastData);
         saveToCache(weatherData, forecastData);
-        cityInput.value = weatherData.name || trimmedCity;
+        // Не показываем название города в поле ввода
+        // cityInput.value = weatherData.name || trimmedCity;
       })
       .catch(error => {
         console.warn('Ошибка запроса:', error.message);
@@ -850,12 +852,11 @@
         return r.json();
       })))
       .then(([weatherData, forecastData]) => {
-        // Если API вернул название — используем его, иначе подставляем имя
-        const displayName = weatherData.name || name || `${lat}, ${lon}`;
         updateUI(weatherData, false);
         updateForecast(forecastData);
         saveToCache(weatherData, forecastData);
-        cityInput.value = displayName;
+        // Не показываем название города
+        // cityInput.value = weatherData.name || name || `${lat}, ${lon}`;
       })
       .catch(error => {
         console.warn('Ошибка запроса по координатам:', error.message);
@@ -882,7 +883,7 @@
         function(position) {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
-          fetchWeatherByCoords(lat, lon, `Моё местоположение (${lat.toFixed(4)}, ${lon.toFixed(4)})`);
+          fetchWeatherByCoords(lat, lon, '📍 Текущая локация');
         },
         function(error) {
           loadingEl.classList.remove('show');
