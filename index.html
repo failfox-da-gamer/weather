@@ -743,7 +743,6 @@
                 errorMsg.classList.remove('show');
                 loading.classList.remove('show');
                 isFetching = false;
-                lastError = '';
             }
 
             function updateForecast(data) {
@@ -801,7 +800,6 @@
                 errorMsg.classList.add('show');
                 loading.classList.remove('show');
                 isFetching = false;
-                lastError = text;
                 debugLog('❌ Ошибка: ' + text);
                 
                 const hasCache = localStorage.getItem('ryazhenka_weather') !== null;
