@@ -231,7 +231,7 @@
 
     // ===== METEOBLUE API =====
     // ВСТАВЬТЕ СВОЙ КЛЮЧ СЮДА (в кавычках)
-    const API_KEY = 'ВАШ_КЛЮЧ_METEOBLUE';
+    const API_KEY = 'bRVa4gjqw2XA6SDK';
     const BASE_URL = 'https://my.meteoblue.com/packages/basic-1h';
 
     let isCelsius = true;
@@ -365,7 +365,7 @@
       forecastGrid.innerHTML = daily.map(item => {
         const temp = getTempDisplay(item.temperature);
         const emojiMap = { 1: '☀️', 2: '⛅', 3: '☁️', 4: '🌧️', 5: '🌦️', 6: '🌨️', 7: '❄️', 8: '⛈️', 9: '🌫️' };
-        const icon = emojiMap[item.pictocode] || '🌍';
+        const icon = emojiMap[item.pictocode] || '🐠';
         return `
           <div class="forecast-item">
             <div class="day">${formatDate(item.time)}</div>
