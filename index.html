@@ -428,8 +428,8 @@
             }
 
             const trimmedCity = city.trim();
-            const weatherUrl = `${BASE_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=980ea6c12983c9ea25ad6919168044c0;
-            const forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=980ea6c12983c9ea25ad6919168044c0;
+            const weatherUrl = `${BASE_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
+            const forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
 
             hideError();
 
