@@ -536,6 +536,64 @@
             fetchWeather(defaultCity);
         }, 100);
     })();
+    let earthTaps = 0;
+let isEarthquake = false;
+const earthEmoji = document.getElementById('weatherIcon'); // или другой элемент с Землёй
+
+// Функция для землетрясения
+function triggerEarthquake() {
+    if (isEarthquake) return;
+    isEarthquake = true;
+
+    const emojis = ['🪱', '🪏', '🌿'];
+    const container = document.body;
+
+    for (let i = 0; i < 30; i++) {
+        const el = document.createElement('div');
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.position = 'fixed';
+        el.style.left = Math.random() * 100 + '%';
+        el.style.top = '-10%';
+        el.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+        el.style.pointerEvents = 'none';
+        el.style.zIndex = '9999';
+        el.style.transition = 'transform 2s ease-in';
+        container.appendChild(el);
+
+        requestAnimationFrame(() => {
+            el.style.transform = `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`;
+        });
+
+        setTimeout(() => el.remove(), 2500);
+    }
+
+    setTimeout(() => {
+        isEarthquake = false;
+    }, 3000);
+}
+
+// Обработчик для ПК (наведение)
+earthEmoji.addEventListener('mouseenter', () => {
+    earthTaps++;
+    if (earthTaps >= 5) {
+        triggerEarthquake();
+        earthTaps = 0;
+    }
+});
+
+// Обработчик для мобильных (касание)
+earthEmoji.addEventListener('click', () => {
+    earthTaps++;
+    if (earthTaps >= 10) {
+        triggerEarthquake();
+        earthTaps = 0;
+    }
+});
+
+// Сброс счётчика через 10 секунд бездействия
+setInterval(() => {
+    earthTaps = 0;
+}, 10000);
 </script>
 </body>
 </html>
