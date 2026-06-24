@@ -3,26 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ряженка 🌤️ + Прогноз</title>
+    <title>Ряженка 🌤️ + Карта + Прогноз</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        .weather-icon {
-    font-size: 4.2rem;
-    line-height: 1;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-    display: inline-block;
-    transition: transform 0.2s ease;
-    cursor: pointer;
-}
-
-/* ПК — наведение */
-.weather-icon:hover {
-    transform: rotate(12deg) scale(1.05);
-}
-
-/* Мобильные — касание */
-.weather-icon:active {
-    transform: rotate(-8deg) scale(1.1);
-}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
         body {
             min-height: 100vh;
@@ -118,7 +101,6 @@
             gap: 0.75rem;
             flex-wrap: wrap;
         }
-        .city-name span { font-size: 1.2rem; font-weight: 400; opacity: 0.8; }
         .weather-main {
             display: flex;
             align-items: center;
@@ -129,43 +111,95 @@
         .temp-block { display: flex; align-items: baseline; gap: 0.25rem; }
         .temp { font-size: 4.8rem; font-weight: 300; line-height: 1; }
         .temp-unit { font-size: 2rem; font-weight: 300; opacity: 0.7; }
-        .weather-icon { font-size: 4.2rem; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+        .weather-icon {
+            font-size: 4.2rem;
+            line-height: 1;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            display: inline-block;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+        .weather-icon:hover { transform: rotate(12deg) scale(1.05); }
+        .weather-icon:active { transform: rotate(-8deg) scale(1.1); }
         .description {
-            font-size: 1.3rem; font-weight: 400; text-transform: capitalize;
-            margin-bottom: 1.6rem; opacity: 0.9;
-            border-left: 3px solid #f5c542; padding-left: 0.9rem;
+            font-size: 1.3rem;
+            font-weight: 400;
+            text-transform: capitalize;
+            margin-bottom: 1.6rem;
+            opacity: 0.9;
+            border-left: 3px solid #f5c542;
+            padding-left: 0.9rem;
         }
         .details-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1.8rem;
-            background: rgba(0, 0, 0, 0.2); border-radius: 2.5rem; padding: 1.5rem 1.8rem;
-            backdrop-filter: blur(4px); margin-top: 0.6rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.9rem 1.8rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 2.5rem;
+            padding: 1.5rem 1.8rem;
+            backdrop-filter: blur(4px);
+            margin-top: 0.6rem;
         }
         .detail-item { display: flex; flex-direction: column; }
         .detail-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
         .detail-value { font-size: 1.4rem; font-weight: 500; margin-top: 2px; }
         .detail-value small { font-size: 0.8rem; font-weight: 300; opacity: 0.7; margin-left: 4px; }
         .error-msg {
-            background: rgba(220, 50, 50, 0.25); backdrop-filter: blur(4px);
-            padding: 0.8rem 1.2rem; border-radius: 40px; margin-top: 0.5rem;
-            border-left: 4px solid #ff7a7a; font-weight: 400; display: none;
+            background: rgba(220, 50, 50, 0.25);
+            backdrop-filter: blur(4px);
+            padding: 0.8rem 1.2rem;
+            border-radius: 40px;
+            margin-top: 0.5rem;
+            border-left: 4px solid #ff7a7a;
+            font-weight: 400;
+            display: none;
         }
         .error-msg.show { display: block; }
         .footer-note { margin-top: 1.5rem; font-size: 0.75rem; text-align: center; opacity: 0.4; letter-spacing: 0.5px; }
         .dev-link {
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-            background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(4px);
-            padding: 0.7rem 1.4rem; border-radius: 50px; color: #f0f8ff; text-decoration: none;
-            font-size: 0.9rem; font-weight: 500; transition: 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.05); margin-top: 1rem; width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(4px);
+            padding: 0.7rem 1.4rem;
+            border-radius: 50px;
+            color: #f0f8ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 1rem;
+            width: 100%;
         }
         .dev-link:hover { background: rgba(245, 197, 66, 0.12); border-color: #f5c542; transform: scale(1.01); }
         .dev-link span { font-size: 1.5rem; }
-        /* Прогнозы */
+        #map {
+            height: 350px;
+            border-radius: 20px;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .leaflet-control-attribution .leaflet-attribution-flag { display: none !important; }
+        .leaflet-control-attribution {
+            font-size: 0.7rem;
+            background: rgba(0, 0, 0, 0.3);
+            color: #ccc;
+            padding: 2px 8px !important;
+            border-radius: 12px;
+        }
+        .leaflet-control-attribution a { color: #8ab4d6 !important; }
         .forecast-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; opacity: 0.8; display: flex; align-items: center; gap: 10px; }
         .forecast-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-top: 8px; }
         .forecast-item {
-            background: rgba(255, 255, 255, 0.06); border-radius: 16px; padding: 14px 10px;
-            text-align: center; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 14px 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
         }
         .forecast-item:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
         .forecast-item .day { font-size: 0.8rem; opacity: 0.6; margin-bottom: 4px; }
@@ -177,9 +211,14 @@
         .hourly-scroll::-webkit-scrollbar { height: 4px; }
         .hourly-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         .hourly-item {
-            flex: 0 0 80px; background: rgba(255, 255, 255, 0.06); border-radius: 16px;
-            padding: 12px 8px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: 0.3s; min-width: 70px;
+            flex: 0 0 80px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
+            min-width: 70px;
         }
         .hourly-item:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
         .hourly-item .time { font-size: 0.7rem; opacity: 0.5; margin-bottom: 4px; }
@@ -190,6 +229,7 @@
             .temp { font-size: 3.6rem; }
             .city-name { font-size: 2rem; }
             .details-grid { grid-template-columns: 1fr; gap: 0.6rem; }
+            #map { height: 250px; }
             .forecast-grid { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
             .hourly-item { flex: 0 0 65px; min-width: 60px; padding: 10px 6px; }
             .hourly-item .temp { font-size: 0.85rem; }
@@ -204,9 +244,9 @@
             <button id="searchBtn">Найти</button>
             <button id="gpsBtn" class="gps-btn" title="Моё местоположение">📍</button>
         </div>
-        <div class="search-hint">Введите город или широту, долготу</div>
+        <div class="search-hint">Введите город или кликните по карте</div>
 
-        <div class="city-name" id="cityName">Москва <span id="countryCode">RU</span></div>
+        <div class="city-name" id="cityName">Москва</div>
 
         <div class="weather-main">
             <div class="temp-block">
@@ -237,15 +277,18 @@
             </div>
         </div>
 
+        <div id="map"></div>
+
         <div class="error-msg" id="errorMsg">⚠️ Город не найден. Проверьте название.</div>
 
         <a href="https://goo.su/5AW3G" target="_blank" class="dev-link">
             <span>🐗</span> Другой сайт от этого разработчика
         </a>
 
-        <div class="footer-note">Данные от OpenWeatherMap</div>
+        <div class="footer-note">Данные от OpenWeatherMap • Карта OpenStreetMap</div>
     </div>
 
+    <!-- КАРТОЧКА ПРОГНОЗА -->
     <div class="weather-card" id="forecastCard">
         <div class="forecast-title">📅 Прогноз на 5 дней</div>
         <div class="forecast-grid" id="forecastGrid">
@@ -261,19 +304,17 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     (function() {
         "use strict";
 
-        // ==== ВСТАВЬ СВОЙ API КЛЮЧ СЮДА ====
+        // ===== ВСТАВЬ СВОЙ КЛЮЧ =====
         const API_KEY = '980ea6c12983c9ea25ad6919168044c0';
         const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
         const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
 
-        // ПРОКСИ (включается автоматически при ошибке CORS)
-        const PROXY = 'https://corsproxy.io/?';
-
-        // ЭЛЕМЕНТЫ DOM
+        // ===== DOM =====
         const cityInput = document.getElementById('cityInput');
         const searchBtn = document.getElementById('searchBtn');
         const gpsBtn = document.getElementById('gpsBtn');
@@ -289,50 +330,95 @@
         const forecastGrid = document.getElementById('forecastGrid');
         const hourlyGrid = document.getElementById('hourlyGrid');
 
-        let useProxy = false;
+        // ===== КАРТА =====
+        const map = L.map('map').setView([55.7558, 37.6173], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-        function capitalizeFirst(str) {
-            if (!str) return '';
-            return str.charAt(0).toUpperCase() + str.slice(1);
+        let marker = null;
+
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+
+            if (marker) {
+                map.removeLayer(marker);
+                marker = null;
+            }
+            marker = L.marker([lat, lon]).addTo(map);
+            marker.bindPopup(`📍 ${lat.toFixed(4)}, ${lon.toFixed(4)}`).openPopup();
+
+            fetchWeatherByCoords(lat, lon);
+        });
+
+        // ===== ФУНКЦИИ ПОГОДЫ =====
+        function fetchWeatherByCoords(lat, lon) {
+            const weatherUrl = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+            const forecastUrl = `${FORECAST_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+
+            Promise.all([
+                fetch(weatherUrl, { headers: { 'Accept': 'application/json' } }),
+                fetch(forecastUrl, { headers: { 'Accept': 'application/json' } })
+            ])
+            .then(responses => Promise.all(responses.map(r => {
+                if (!r.ok) throw new Error('Ошибка ' + r.status);
+                return r.json();
+            })))
+            .then(([weatherData, forecastData]) => {
+                updateUI(weatherData);
+                updateForecast(forecastData);
+            })
+            .catch(err => {
+                showError('Не удалось получить данные для этой точки');
+                console.warn(err);
+            });
         }
 
-        function translateDescription(desc) {
-            const map = {
-                'clear sky': 'ясно', 'few clouds': 'малооблачно',
-                'scattered clouds': 'переменная облачность', 'broken clouds': 'облачно',
-                'overcast clouds': 'пасмурно', 'shower rain': 'ливень',
-                'rain': 'дождь', 'thunderstorm': 'гроза', 'snow': 'снег',
-                'mist': 'туман', 'smoke': 'дымка', 'haze': 'мгла',
-                'dust': 'пыль', 'fog': 'туман', 'sand': 'песчаная буря',
-                'ash': 'пепел', 'squall': 'шквал', 'tornado': 'торнадо'
-            };
-            const lower = desc.toLowerCase();
-            return map[lower] || lower;
-        }
+        function fetchWeather(city) {
+            if (!city || city.trim() === '') {
+                showError('Введите город');
+                return;
+            }
 
-        function getWeatherEmoji(iconCode) {
-            if (!iconCode) return '🌍';
-            const code = iconCode.slice(0, 2);
-            const map = { '01': '☀️', '02': '⛅', '03': '☁️', '04': '☁️',
-                '09': '🌧️', '10': '🌦️', '11': '⛈️', '13': '❄️', '50': '🌫️' };
-            return map[code] || '🌈';
-        }
+            const trimmedCity = city.trim();
+            const weatherUrl = `${BASE_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
+            const forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
 
-        function formatDate(dt) {
-            const d = new Date(dt * 1000);
-            return d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' });
-        }
-
-        function formatTime(dt) {
-            const d = new Date(dt * 1000);
-            return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            Promise.all([
+                fetch(weatherUrl, { headers: { 'Accept': 'application/json' } }),
+                fetch(forecastUrl, { headers: { 'Accept': 'application/json' } })
+            ])
+            .then(responses => Promise.all(responses.map(r => {
+                if (!r.ok) {
+                    if (r.status === 404) throw new Error('Город не найден');
+                    if (r.status === 401) throw new Error('Ошибка API: проверьте ключ');
+                    throw new Error(`Ошибка ${r.status}`);
+                }
+                return r.json();
+            })))
+            .then(([weatherData, forecastData]) => {
+                updateUI(weatherData);
+                updateForecast(forecastData);
+                if (weatherData.coord) {
+                    map.setView([weatherData.coord.lat, weatherData.coord.lon], 10);
+                    if (marker) {
+                        map.removeLayer(marker);
+                        marker = null;
+                    }
+                    marker = L.marker([weatherData.coord.lat, weatherData.coord.lon]).addTo(map);
+                    marker.bindPopup(`📍 ${weatherData.name}`).openPopup();
+                }
+            })
+            .catch(err => {
+                showError(err.message || 'Не удалось найти город');
+                console.warn(err);
+            });
         }
 
         function updateUI(data) {
             const city = data.name || 'Неизвестно';
-            const country = '';
-            cityNameEl.innerHTML = `${city} <span id="countryCode">${country}</span>`;
+            cityNameEl.textContent = city;
 
             const temp = data.main?.temp;
             if (temp !== undefined) {
@@ -413,6 +499,42 @@
             }).join('');
         }
 
+        function capitalizeFirst(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function translateDescription(desc) {
+            const map = {
+                'clear sky': 'ясно', 'few clouds': 'малооблачно',
+                'scattered clouds': 'переменная облачность', 'broken clouds': 'облачно',
+                'overcast clouds': 'пасмурно', 'shower rain': 'ливень',
+                'rain': 'дождь', 'thunderstorm': 'гроза', 'snow': 'снег',
+                'mist': 'туман', 'smoke': 'дымка', 'haze': 'мгла',
+                'dust': 'пыль', 'fog': 'туман', 'sand': 'песчаная буря',
+                'ash': 'пепел', 'squall': 'шквал', 'tornado': 'торнадо'
+            };
+            return map[desc.toLowerCase()] || desc;
+        }
+
+        function getWeatherEmoji(iconCode) {
+            if (!iconCode) return '🌍';
+            const code = iconCode.slice(0, 2);
+            const map = {
+                '01': '☀️', '02': '⛅', '03': '☁️', '04': '☁️',
+                '09': '🌧️', '10': '🌦️', '11': '⛈️', '13': '❄️', '50': '🌫️'
+            };
+            return map[code] || '🌈';
+        }
+
+        function formatDate(dt) {
+            return new Date(dt * 1000).toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' });
+        }
+
+        function formatTime(dt) {
+            return new Date(dt * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
+
         function showError(msg) {
             errorMsgEl.textContent = `⚠️ ${msg}`;
             errorMsgEl.classList.add('show');
@@ -420,65 +542,6 @@
 
         function hideError() {
             errorMsgEl.classList.remove('show');
-        }
-
-        function clearWeatherData() {
-            temperatureEl.textContent = '--';
-            feelsLikeEl.innerHTML = '-- <small>°C</small>';
-            humidityEl.innerHTML = '-- <small>%</small>';
-            pressureEl.innerHTML = '-- <small>гПа</small>';
-            windSpeedEl.innerHTML = '-- <small>м/с</small>';
-            descriptionEl.textContent = '—';
-            weatherIconEl.textContent = '🌍';
-            cityNameEl.innerHTML = 'Город <span id="countryCode"></span>';
-            forecastGrid.innerHTML = '<div style="text-align:center; opacity:0.5; grid-column:1/-1; padding:20px 0;">⏳ Загрузка прогноза...</div>';
-            hourlyGrid.innerHTML = '<div style="text-align:center; opacity:0.5; padding:20px 0; width:100%;">⏳ Загрузка почасового прогноза...</div>';
-        }
-
-        function fetchWithProxy(url) {
-            return useProxy ? fetch(PROXY + url) : fetch(url);
-        }
-
-        function fetchWeather(city) {
-            if (!city || city.trim() === '') {
-                showError('Пожалуйста, введите город.');
-                return;
-            }
-
-            const trimmedCity = city.trim();
-            const weatherUrl = `${BASE_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
-            const forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(trimmedCity)}&units=metric&lang=ru&appid=${API_KEY}`;
-
-            hideError();
-
-            Promise.all([
-                fetchWithProxy(weatherUrl, { headers: { 'Accept': 'application/json' } }),
-                fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } })
-            ])
-            .then(responses => Promise.all(responses.map(r => {
-                if (!r.ok) {
-                    if (r.status === 404) throw new Error('Город не найден');
-                    if (r.status === 401) throw new Error('Ошибка API: проверьте ключ');
-                    throw new Error(`Ошибка ${r.status}`);
-                }
-                return r.json();
-            })))
-            .then(([weatherData, forecastData]) => {
-                updateUI(weatherData);
-                updateForecast(forecastData);
-            })
-            .catch(error => {
-                console.warn('Ошибка запроса:', error.message);
-                // Если ошибка CORS и прокси не использовался — включаем прокси и повторяем
-                if (!useProxy && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
-                    useProxy = true;
-                    console.log('🔄 Включаем прокси и повторяем запрос...');
-                    fetchWeather(city);
-                    return;
-                }
-                showError('Не удалось найти город. Проверьте название.');
-                clearWeatherData();
-            });
         }
 
         function handleSearch() {
@@ -490,53 +553,6 @@
             }
         }
 
-        function getCurrentLocation() {
-            if (!navigator.geolocation) {
-                showError('Ваш браузер не поддерживает геолокацию');
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const weatherUrl = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
-                    const forecastUrl = `${FORECAST_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
-
-                    Promise.all([
-                        fetchWithProxy(weatherUrl, { headers: { 'Accept': 'application/json' } }),
-                        fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } })
-                    ])
-                    .then(responses => Promise.all(responses.map(r => {
-                        if (!r.ok) throw new Error(`Ошибка ${r.status}`);
-                        return r.json();
-                    })))
-                    .then(([weatherData, forecastData]) => {
-                        updateUI(weatherData);
-                        updateForecast(forecastData);
-                    })
-                    .catch(error => {
-                        if (!useProxy && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
-                            useProxy = true;
-                            console.log('🔄 Включаем прокси и повторяем GPS-запрос...');
-                            getCurrentLocation();
-                            return;
-                        }
-                        showError('Не удалось получить погоду по координатам');
-                        clearWeatherData();
-                    });
-                },
-                function(error) {
-                    let msg = 'Не удалось определить местоположение';
-                    if (error.code === 1) msg = 'Доступ к геолокации запрещен';
-                    else if (error.code === 2) msg = 'Сигнал GPS недоступен';
-                    else if (error.code === 3) msg = 'Время ожидания истекло';
-                    showError(msg);
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        }
-
         searchBtn.addEventListener('click', handleSearch);
         cityInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -544,12 +560,40 @@
                 handleSearch();
             }
         });
-        gpsBtn.addEventListener('click', getCurrentLocation);
+
+        gpsBtn.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                showError('Ваш браузер не поддерживает геолокацию');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    fetchWeatherByCoords(lat, lon);
+                    map.setView([lat, lon], 12);
+                    if (marker) {
+                        map.removeLayer(marker);
+                        marker = null;
+                    }
+                    marker = L.marker([lat, lon]).addTo(map);
+                    marker.bindPopup(`📍 Ваше местоположение`).openPopup();
+                },
+                function(err) {
+                    let msg = 'Не удалось определить местоположение';
+                    if (err.code === 1) msg = 'Доступ запрещён';
+                    else if (err.code === 2) msg = 'Сигнал GPS недоступен';
+                    else if (err.code === 3) msg = 'Время ожидания истекло';
+                    showError(msg);
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        });
 
         setTimeout(() => {
             const defaultCity = cityInput.value.trim() || 'Moscow';
             fetchWeather(defaultCity);
-        }, 100);
+        }, 300);
     })();
 </script>
 </body>
