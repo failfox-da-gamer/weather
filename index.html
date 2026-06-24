@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ряженка 🌤️ + Прогноз</title>
+    <title>Ряженка 🌤️ + Карта</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
         body {
@@ -142,7 +143,21 @@
         }
         .dev-link:hover { background: rgba(245, 197, 66, 0.12); border-color: #f5c542; transform: scale(1.01); }
         .dev-link span { font-size: 1.5rem; }
-        /* Прогнозы */
+        #map {
+            height: 350px;
+            border-radius: 20px;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .leaflet-control-attribution .leaflet-attribution-flag { display: none !important; }
+        .leaflet-control-attribution {
+            font-size: 0.7rem;
+            background: rgba(0, 0, 0, 0.3);
+            color: #ccc;
+            padding: 2px 8px !important;
+            border-radius: 12px;
+        }
+        .leaflet-control-attribution a { color: #8ab4d6 !important; }
         .forecast-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; opacity: 0.8; display: flex; align-items: center; gap: 10px; }
         .forecast-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-top: 8px; }
         .forecast-item {
@@ -172,6 +187,7 @@
             .temp { font-size: 3.6rem; }
             .city-name { font-size: 2rem; }
             .details-grid { grid-template-columns: 1fr; gap: 0.6rem; }
+            #map { height: 250px; }
             .forecast-grid { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
             .hourly-item { flex: 0 0 65px; min-width: 60px; padding: 10px 6px; }
             .hourly-item .temp { font-size: 0.85rem; }
@@ -186,7 +202,7 @@
             <button id="searchBtn">Найти</button>
             <button id="gpsBtn" class="gps-btn" title="Моё местоположение">📍</button>
         </div>
-        <div class="search-hint">Введите город или широту, долготу</div>
+        <div class="search-hint">Введите город или кликните по карте</div>
 
         <div class="city-name" id="cityName">Москва <span id="countryCode">RU</span></div>
 
@@ -219,13 +235,15 @@
             </div>
         </div>
 
+        <div id="map"></div>
+
         <div class="error-msg" id="errorMsg">⚠️ Город не найден. Проверьте название.</div>
 
         <a href="https://goo.su/5AW3G" target="_blank" class="dev-link">
             <span>🐗</span> Другой сайт от этого разработчика
         </a>
 
-        <div class="footer-note">Данные от OpenWeatherMap</div>
+        <div class="footer-note">Данные от OpenWeatherMap • Карта OpenStreetMap</div>
     </div>
 
     <div class="weather-card" id="forecastCard">
@@ -241,22 +259,24 @@
 
         <div class="footer-note" style="margin-top:1rem;">Прогноз от OpenWeatherMap</div>
         <div style="text-align: center; margin-top: 1.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; opacity: 0.5;">
-    📧 <a href="mailto:maxikgrinevitch@yandex.ru" style="color: #f5c542; text-decoration: none;">maxikgrinevitch@yandex.ru</a>
-</div>
+            📧 <a href="mailto:maxikgrinevitch@yandex.ru" style="color: #f5c542; text-decoration: none;">maxikgrinevitch@yandex.ru</a>
+        </div>
     </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     (function() {
         "use strict";
 
-        // ==== ВСТАВЬ СВОЙ API КЛЮЧ СЮДА ====
-        const API_KEY = '980ea6c12983c9ea25ad6919168044c0';
+        // ===== ВСТАВЬ СВОЙ API КЛЮЧ СЮДА =====
+        const API_KEY = '🍭';
         const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
         const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
 
-        // ПРОКСИ (включается автоматически при ошибке CORS)
+        // ПРОКСИ
         const PROXY = 'https://corsproxy.io/?';
+        let useProxy = false;
 
         // ЭЛЕМЕНТЫ DOM
         const cityInput = document.getElementById('cityInput');
@@ -274,9 +294,30 @@
         const forecastGrid = document.getElementById('forecastGrid');
         const hourlyGrid = document.getElementById('hourlyGrid');
 
-        let useProxy = false;
+        // ===== КАРТА =====
+        const map = L.map('map').setView([55.7558, 37.6173], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        let marker = null;
+
+        // Клик по карте
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lon;
+
+            if (marker) {
+                map.removeLayer(marker);
+                marker = null;
+            }
+            marker = L.marker([lat, lon]).addTo(map);
+            marker.bindPopup(`📍 ${lat.toFixed(4)}, ${lon.toFixed(4)}`).openPopup();
+
+            fetchWeatherByCoords(lat, lon);
+        });
+
+        // ===== ОСНОВНЫЕ ФУНКЦИИ =====
         function capitalizeFirst(str) {
             if (!str) return '';
             return str.charAt(0).toUpperCase() + str.slice(1);
@@ -292,8 +333,7 @@
                 'dust': 'пыль', 'fog': 'туман', 'sand': 'песчаная буря',
                 'ash': 'пепел', 'squall': 'шквал', 'tornado': 'торнадо'
             };
-            const lower = desc.toLowerCase();
-            return map[lower] || lower;
+            return map[desc.toLowerCase()] || desc;
         }
 
         function getWeatherEmoji(iconCode) {
@@ -305,13 +345,11 @@
         }
 
         function formatDate(dt) {
-            const d = new Date(dt * 1000);
-            return d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' });
+            return new Date(dt * 1000).toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' });
         }
 
         function formatTime(dt) {
-            const d = new Date(dt * 1000);
-            return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            return new Date(dt * 1000).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         }
 
         function updateUI(data) {
@@ -424,6 +462,27 @@
             return useProxy ? fetch(PROXY + url) : fetch(url);
         }
 
+        function fetchWeatherByCoords(lat, lon) {
+            const url = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+            fetchWithProxy(url, { headers: { 'Accept': 'application/json' } })
+                .then(r => {
+                    if (!r.ok) throw new Error('Ошибка ' + r.status);
+                    return r.json();
+                })
+                .then(data => {
+                    updateUI(data);
+                    // Также обновляем прогноз по координатам
+                    const forecastUrl = `${FORECAST_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+                    return fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } });
+                })
+                .then(r => r.json())
+                .then(forecastData => updateForecast(forecastData))
+                .catch(err => {
+                    console.warn('Ошибка запроса по координатам:', err);
+                    showError('Не удалось получить погоду для этой точки');
+                });
+        }
+
         function fetchWeather(city) {
             if (!city || city.trim() === '') {
                 showError('Пожалуйста, введите город.');
@@ -454,7 +513,6 @@
             })
             .catch(error => {
                 console.warn('Ошибка запроса:', error.message);
-                // Если ошибка CORS и прокси не использовался — включаем прокси и повторяем
                 if (!useProxy && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
                     useProxy = true;
                     console.log('🔄 Включаем прокси и повторяем запрос...');
@@ -485,31 +543,7 @@
                 function(position) {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
-                    const weatherUrl = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
-                    const forecastUrl = `${FORECAST_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
-
-                    Promise.all([
-                        fetchWithProxy(weatherUrl, { headers: { 'Accept': 'application/json' } }),
-                        fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } })
-                    ])
-                    .then(responses => Promise.all(responses.map(r => {
-                        if (!r.ok) throw new Error(`Ошибка ${r.status}`);
-                        return r.json();
-                    })))
-                    .then(([weatherData, forecastData]) => {
-                        updateUI(weatherData);
-                        updateForecast(forecastData);
-                    })
-                    .catch(error => {
-                        if (!useProxy && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
-                            useProxy = true;
-                            console.log('🔄 Включаем прокси и повторяем GPS-запрос...');
-                            getCurrentLocation();
-                            return;
-                        }
-                        showError('Не удалось получить погоду по координатам');
-                        clearWeatherData();
-                    });
+                    fetchWeatherByCoords(lat, lon);
                 },
                 function(error) {
                     let msg = 'Не удалось определить местоположение';
@@ -536,64 +570,66 @@
             fetchWeather(defaultCity);
         }, 100);
     })();
-    let earthTaps = 0;
-let isEarthquake = false;
-const earthEmoji = document.getElementById('weatherIcon'); // или другой элемент с Землёй
 
-// Функция для землетрясения
-function triggerEarthquake() {
-    if (isEarthquake) return;
-    isEarthquake = true;
+    // ===== ЗЕМЛЕТРЯСЕНИЕ =====
+    (function() {
+        let earthTaps = 0;
+        let isEarthquake = false;
+        const earthEmoji = document.getElementById('weatherIcon');
 
-    const emojis = ['🪱', '🪏', '🌿'];
-    const container = document.body;
+        function triggerEarthquake() {
+            if (isEarthquake) return;
+            isEarthquake = true;
 
-    for (let i = 0; i < 30; i++) {
-        const el = document.createElement('div');
-        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        el.style.position = 'fixed';
-        el.style.left = Math.random() * 100 + '%';
-        el.style.top = '-10%';
-        el.style.fontSize = (Math.random() * 2 + 1) + 'rem';
-        el.style.pointerEvents = 'none';
-        el.style.zIndex = '9999';
-        el.style.transition = 'transform 2s ease-in';
-        container.appendChild(el);
+            const emojis = ['🪱', '🪏', '🌿'];
+            const container = document.body;
 
-        requestAnimationFrame(() => {
-            el.style.transform = `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`;
-        });
+            for (let i = 0; i < 30; i++) {
+                const el = document.createElement('div');
+                el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                el.style.position = 'fixed';
+                el.style.left = Math.random() * 100 + '%';
+                el.style.top = '-10%';
+                el.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+                el.style.pointerEvents = 'none';
+                el.style.zIndex = '9999';
+                el.style.transition = 'transform 2s ease-in';
+                container.appendChild(el);
 
-        setTimeout(() => el.remove(), 2500);
-    }
+                requestAnimationFrame(() => {
+                    el.style.transform = `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`;
+                });
 
-    setTimeout(() => {
-        isEarthquake = false;
-    }, 3000);
-}
+                setTimeout(() => el.remove(), 2500);
+            }
 
-// Обработчик для ПК (наведение)
-earthEmoji.addEventListener('mouseenter', () => {
-    earthTaps++;
-    if (earthTaps >= 5) {
-        triggerEarthquake();
-        earthTaps = 0;
-    }
-});
+            setTimeout(() => {
+                isEarthquake = false;
+            }, 3000);
+        }
 
-// Обработчик для мобильных (касание)
-earthEmoji.addEventListener('click', () => {
-    earthTaps++;
-    if (earthTaps >= 10) {
-        triggerEarthquake();
-        earthTaps = 0;
-    }
-});
+        if (earthEmoji) {
+            earthEmoji.addEventListener('mouseenter', () => {
+                earthTaps++;
+                if (earthTaps >= 5) {
+                    triggerEarthquake();
+                    earthTaps = 0;
+                }
+            });
 
-// Сброс счётчика через 10 секунд бездействия
-setInterval(() => {
-    earthTaps = 0;
-}, 10000);
+            earthEmoji.addEventListener('click', () => {
+                earthTaps++;
+                if (earthTaps >= 10) {
+                    triggerEarthquake();
+                    earthTaps = 0;
+                }
+            });
+
+            setInterval(() => {
+                earthTaps = 0;
+            }, 10000);
+        }
+    })();
 </script>
 </body>
 </html>
