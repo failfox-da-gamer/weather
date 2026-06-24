@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ряженка 🌤️ + Прогноз</title>
     <style>
+        .weather-icon {
+    font-size: 4.2rem;
+    line-height: 1;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    display: inline-block;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+}
+
+/* ПК — наведение */
+.weather-icon:hover {
+    transform: rotate(12deg) scale(1.05);
+}
+
+/* Мобильные — касание */
+.weather-icon:active {
+    transform: rotate(-8deg) scale(1.1);
+}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
         body {
             min-height: 100vh;
@@ -313,7 +331,7 @@
 
         function updateUI(data) {
             const city = data.name || 'Неизвестно';
-            const country = data.sys?.country || '';
+            const country = '';
             cityNameEl.innerHTML = `${city} <span id="countryCode">${country}</span>`;
 
             const temp = data.main?.temp;
