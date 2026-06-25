@@ -2,8 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Ряженка 🌤️ + Карта</title>
+    <!-- Подключаем Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
@@ -143,8 +144,9 @@
         }
         .dev-link:hover { background: rgba(245, 197, 66, 0.12); border-color: #f5c542; transform: scale(1.01); }
         .dev-link span { font-size: 1.5rem; }
-        #map {
-            height: 350px;
+        #osm-map {
+            height: 400px;
+            width: 100%;
             border-radius: 20px;
             margin-top: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -187,7 +189,7 @@
             .temp { font-size: 3.6rem; }
             .city-name { font-size: 2rem; }
             .details-grid { grid-template-columns: 1fr; gap: 0.6rem; }
-            #map { height: 250px; }
+            #osm-map { height: 250px; }
             .forecast-grid { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
             .hourly-item { flex: 0 0 65px; min-width: 60px; padding: 10px 6px; }
             .hourly-item .temp { font-size: 0.85rem; }
@@ -235,7 +237,8 @@
             </div>
         </div>
 
-        <div id="map"></div>
+        <!-- ===== КАРТА ===== -->
+        <div id="osm-map"></div>
 
         <div class="error-msg" id="errorMsg">⚠️ Город не найден. Проверьте название.</div>
 
@@ -264,13 +267,14 @@
     </div>
 </div>
 
+<!-- Подключаем Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     (function() {
         "use strict";
 
         // ===== ВСТАВЬ СВОЙ API КЛЮЧ СЮДА =====
-        const API_KEY = '980ea6c12983c9ea25ad6919168044c0';
+        const API_KEY = '🍭';
         const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
         const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
 
@@ -294,28 +298,61 @@
         const forecastGrid = document.getElementById('forecastGrid');
         const hourlyGrid = document.getElementById('hourlyGrid');
 
-        // ===== КАРТА =====
-        const map = L.map('map').setView([55.7558, 37.6173], 10);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        let marker = null;
-
-        // Клик по карте
-        map.on('click', function(e) {
-            const lat = e.latlng.lat;
-            const lon = e.latlng.lon;
-
-            if (marker) {
-                map.removeLayer(marker);
-                marker = null;
+        // ===== КАРТА (НА ОСНОВЕ КОДА ИЗ STACK OVERFLOW) =====
+        function initMap() {
+            const element = document.getElementById('osm-map');
+            if (!element) {
+                console.error('❌ Контейнер #osm-map не найден');
+                return;
             }
-            marker = L.marker([lat, lon]).addTo(map);
-            marker.bindPopup(`📍 ${lat.toFixed(4)}, ${lon.toFixed(4)}`).openPopup();
 
-            fetchWeatherByCoords(lat, lon);
-        });
+            // Создаём карту
+            const map = L.map(element, {
+                center: [55.7558, 37.6173],
+                zoom: 10,
+                tap: true,
+                touchZoom: true,
+                scrollWheelZoom: true
+            });
+
+            // Добавляем слой OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            let marker = null;
+
+            // Клик по карте
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lon = e.latlng.lng;
+
+                if (marker) {
+                    map.removeLayer(marker);
+                    marker = null;
+                }
+
+                marker = L.marker([lat, lon]).addTo(map);
+                marker.bindPopup(`📍 ${lat.toFixed(4)}, ${lon.toFixed(4)}`).openPopup();
+
+                fetchWeatherByCoords(lat, lon);
+            });
+
+            // Начальный маркер
+            marker = L.marker([55.7558, 37.6173]).addTo(map);
+            marker.bindPopup('📍 Москва').openPopup();
+
+            console.log('✅ Карта инициализирована');
+        }
+
+        // Запускаем карту после загрузки страницы
+        if (document.readyState === 'complete') {
+            setTimeout(initMap, 300);
+        } else {
+            window.addEventListener('load', function() {
+                setTimeout(initMap, 300);
+            });
+        }
 
         // ===== ОСНОВНЫЕ ФУНКЦИИ =====
         function capitalizeFirst(str) {
@@ -471,7 +508,6 @@
                 })
                 .then(data => {
                     updateUI(data);
-                    // Также обновляем прогноз по координатам
                     const forecastUrl = `${FORECAST_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
                     return fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } });
                 })
