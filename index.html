@@ -355,12 +355,30 @@
             return map[desc.toLowerCase()] || desc;
         }
 
-        function getWeatherEmoji(iconCode) {
-            if (!iconCode) return '🌍';
-            const code = iconCode.slice(0, 2);
-            const map = { '01': '☀️', '02': '⛅', '03': '☁️', '04': '☁️',
-                '09': '🌧️', '10': '🌦️', '11': '⛈️', '13': '❄️', '50': '🌫️' };
-            return map[code] || '🌈';
+function getWeatherEmoji(iconCode) {
+    if (!iconCode) return '🌍';
+    const code = iconCode.slice(0, 2);
+
+    // ===== ЕСЛИ ЯСНАЯ ПОГОДА (01d / 01n) — ПРОВЕРЯЕМ ВРЕМЯ =====
+    if (code === '01') {
+        const now = new Date();
+        const hours = now.getHours();
+        // Ночь: 20:00–23:59 и 0:00–5:59
+        if (hours >= 20 || hours < 6) {
+            return '🌙';
+        } else {
+            return '☀️';
+        }
+    }
+
+    // ===== ОСТАЛЬНЫЕ ИКОНКИ =====
+    const map = {
+        '02': '⛅', '03': '☁️', '04': '☁️',
+        '09': '🌧️', '10': '🌦️', '11': '⛈️',
+        '13': '❄️', '50': '🌫️'
+    };
+    return map[code] || '🌈';
+}
         }
 
         function formatDate(dt) {
