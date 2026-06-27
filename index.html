@@ -550,29 +550,42 @@
                 showError('Введите название города');
             }
         }
-
+        
         function getCurrentLocation() {
-            if (!navigator.geolocation) {
-                showError('Ваш браузер не поддерживает геолокацию');
-                return;
+    if (!navigator.geolocation) {
+        showError('Ваш браузер не поддерживает геолокацию');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            // ===== СТАВИМ БУЛАВКУ НА КАРТУ =====
+            if (map) {
+                if (marker) {
+                    map.removeLayer(marker);
+                    marker = null;
+                }
+                marker = L.marker([lat, lon]).addTo(map);
+                marker.bindPopup('📍 Ваше местоположение').openPopup();
+                map.setView([lat, lon], 14); // приближаем
             }
 
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    fetchWeatherByCoords(lat, lon);
-                },
-                function(error) {
-                    let msg = 'Не удалось определить местоположение';
-                    if (error.code === 1) msg = 'Доступ к геолокации запрещен';
-                    else if (error.code === 2) msg = 'Сигнал GPS недоступен';
-                    else if (error.code === 3) msg = 'Время ожидания истекло';
-                    showError(msg);
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        }
+            // Запрашиваем погоду для этих координат
+            fetchWeatherByCoords(lat, lon);
+        },
+        function(error) {
+            let msg = 'Не удалось определить местоположение';
+            if (error.code === 1) msg = 'Доступ к геолокации запрещен';
+            else if (error.code === 2) msg = 'Сигнал GPS недоступен';
+            else if (error.code === 3) msg = 'Время ожидания истекло';
+            showError(msg);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
+}
 
         searchBtn.addEventListener('click', handleSearch);
         cityInput.addEventListener('keydown', (e) => {
