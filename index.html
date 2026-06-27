@@ -661,6 +661,73 @@
             }, 10000);
         }
     })();
+    // ===== КЕШ =====
+function saveToCache(weatherData, forecastData) {
+    try {
+        const data = { weather: weatherData, forecast: forecastData, timestamp: Date.now() };
+        localStorage.setItem('ryazhenka_cache', JSON.stringify(data));
+    } catch (e) {}
+}
+
+function loadFromCache() {
+    try {
+        const cached = localStorage.getItem('ryazhenka_cache');
+        if (!cached) return null;
+        const data = JSON.parse(cached);
+        if (Date.now() - data.timestamp > 43200000) return null; // 12 часов
+        return data;
+    } catch (e) { return null; }
+}
+
+// ===== ОПТИМИЗИРОВАННЫЙ ЗАПУСК =====
+function initApp() {
+    const cached = loadFromCache();
+    if (cached) {
+        updateUI(cached.weather);
+        if (cached.forecast) updateForecast(cached.forecast);
+        if (cached.weather?.coord) {
+            setMarker(cached.weather.coord.lat, cached.weather.coord.lon, '📍 ' + cached.weather.name);
+        }
+    }
+
+    setTimeout(() => {
+        if (!map) initMap();
+    }, 500);
+
+    const city = cityInput.value.trim() || 'Moscow';
+    fetchWeatherOptimized(city);
+}
+
+// ===== ОПТИМИЗИРОВАННЫЙ ЗАПРОС =====
+function fetchWeatherOptimized(city) {
+    if (!city.trim()) return;
+
+    const weatherUrl = `${BASE_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
+    const forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
+
+    Promise.all([
+        fetchWithProxy(weatherUrl, { headers: { 'Accept': 'application/json' } }),
+        fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } })
+    ])
+    .then(responses => Promise.all(responses.map(r => {
+        if (!r.ok) throw new Error(`Ошибка ${r.status}`);
+        return r.json();
+    })))
+    .then(([weatherData, forecastData]) => {
+        updateUI(weatherData);
+        updateForecast(forecastData);
+        saveToCache(weatherData, forecastData);
+        if (weatherData.coord) {
+            setMarker(weatherData.coord.lat, weatherData.coord.lon, '📍 ' + weatherData.name);
+        }
+    })
+    .catch(error => {
+        console.warn('Ошибка обновления:', error.message);
+        if (!loadFromCache()) {
+            showError('Не удалось загрузить погоду');
+        }
+    });
+}
 </script>
 </body>
 </html>
