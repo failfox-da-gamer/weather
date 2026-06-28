@@ -658,11 +658,44 @@
             }
         }
 
-        function getCurrentLocation() {
-            if (!navigator.geolocation) {
-                showError('Ваш браузер не поддерживает геолокацию');
-                return;
+function getCurrentLocation() {
+    if (!navigator.geolocation) {
+        showError('Ваш браузер не поддерживает геолокацию');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            // ===== СТАВИМ БУЛАВКУ НА КАРТУ =====
+            if (map) {
+                // Удаляем старый маркер, если есть
+                if (marker) {
+                    map.removeLayer(marker);
+                    marker = null;
+                }
+                // Создаём новый маркер
+                marker = L.marker([lat, lon]).addTo(map);
+                marker.bindPopup('📍 Ваше местоположение').openPopup();
+                // Центрируем карту
+                map.setView([lat, lon], 14);
             }
+
+            // Запрашиваем погоду для этих координат
+            fetchWeatherByCoords(lat, lon);
+        },
+        function(error) {
+            let msg = 'Не удалось определить местоположение';
+            if (error.code === 1) msg = 'Доступ к геолокации запрещен';
+            else if (error.code === 2) msg = 'Сигнал GPS недоступен';
+            else if (error.code === 3) msg = 'Время ожидания истекло';
+            showError(msg);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
+}
 
             navigator.geolocation.getCurrentPosition(
                 function(position) {
