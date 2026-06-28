@@ -671,15 +671,12 @@ function getCurrentLocation() {
 
             // ===== СТАВИМ БУЛАВКУ НА КАРТУ =====
             if (map) {
-                // Удаляем старый маркер, если есть
                 if (marker) {
                     map.removeLayer(marker);
                     marker = null;
                 }
-                // Создаём новый маркер
                 marker = L.marker([lat, lon]).addTo(map);
                 marker.bindPopup('📍 Ваше местоположение').openPopup();
-                // Центрируем карту
                 map.setView([lat, lon], 14);
             }
 
