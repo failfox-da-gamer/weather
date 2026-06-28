@@ -119,27 +119,69 @@
             border-left: 3px solid #f5c542; padding-left: 0.9rem;
         }
         .details-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1.8rem;
-            background: rgba(0, 0, 0, 0.2); border-radius: 2.5rem; padding: 1.5rem 1.8rem;
-            backdrop-filter: blur(4px); margin-top: 0.6rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.9rem 1.8rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 2.5rem;
+            padding: 1.5rem 1.8rem;
+            backdrop-filter: blur(4px);
+            margin-top: 0.6rem;
         }
         .detail-item { display: flex; flex-direction: column; }
         .detail-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
         .detail-value { font-size: 1.4rem; font-weight: 500; margin-top: 2px; }
         .detail-value small { font-size: 0.8rem; font-weight: 300; opacity: 0.7; margin-left: 4px; }
+        .pressure-wrap {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pressure-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2px 10px;
+            color: #f0f8ff;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+        .pressure-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #f5c542;
+        }
         .error-msg {
-            background: rgba(220, 50, 50, 0.25); backdrop-filter: blur(4px);
-            padding: 0.8rem 1.2rem; border-radius: 40px; margin-top: 0.5rem;
-            border-left: 4px solid #ff7a7a; font-weight: 400; display: none;
+            background: rgba(220, 50, 50, 0.25);
+            backdrop-filter: blur(4px);
+            padding: 0.8rem 1.2rem;
+            border-radius: 40px;
+            margin-top: 0.5rem;
+            border-left: 4px solid #ff7a7a;
+            font-weight: 400;
+            display: none;
         }
         .error-msg.show { display: block; }
         .footer-note { margin-top: 1.5rem; font-size: 0.75rem; text-align: center; opacity: 0.4; letter-spacing: 0.5px; }
         .dev-link {
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-            background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(4px);
-            padding: 0.7rem 1.4rem; border-radius: 50px; color: #f0f8ff; text-decoration: none;
-            font-size: 0.9rem; font-weight: 500; transition: 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.05); margin-top: 1rem; width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(4px);
+            padding: 0.7rem 1.4rem;
+            border-radius: 50px;
+            color: #f0f8ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 1rem;
+            width: 100%;
         }
         .dev-link:hover { background: rgba(245, 197, 66, 0.12); border-color: #f5c542; transform: scale(1.01); }
         .dev-link span { font-size: 1.5rem; }
@@ -161,8 +203,12 @@
         .forecast-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; opacity: 0.8; display: flex; align-items: center; gap: 10px; }
         .forecast-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-top: 8px; }
         .forecast-item {
-            background: rgba(255, 255, 255, 0.06); border-radius: 16px; padding: 14px 10px;
-            text-align: center; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 14px 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
         }
         .forecast-item:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
         .forecast-item .day { font-size: 0.8rem; opacity: 0.6; margin-bottom: 4px; }
@@ -174,9 +220,14 @@
         .hourly-scroll::-webkit-scrollbar { height: 4px; }
         .hourly-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         .hourly-item {
-            flex: 0 0 80px; background: rgba(255, 255, 255, 0.06); border-radius: 16px;
-            padding: 12px 8px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: 0.3s; min-width: 70px;
+            flex: 0 0 80px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
+            min-width: 70px;
         }
         .hourly-item:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
         .hourly-item .time { font-size: 0.7rem; opacity: 0.5; margin-bottom: 4px; }
@@ -231,7 +282,10 @@
             </div>
             <div class="detail-item">
                 <span class="detail-label">📊 Давление</span>
-                <span class="detail-value" id="pressure">-- <small>гПа</small></span>
+                <div class="pressure-wrap">
+                    <span class="detail-value" id="pressure">-- <small>гПа</small></span>
+                    <button class="pressure-toggle" id="pressureToggle">↔ мм рт.ст.</button>
+                </div>
             </div>
         </div>
 
@@ -269,16 +323,14 @@
     (function() {
         "use strict";
 
-        // ===== ВСТАВЬ СВОЙ API КЛЮЧ СЮДА =====
+        // ===== КОНФИГ =====
         const API_KEY = '980ea6c12983c9ea25ad6919168044c0';
         const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
         const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
-
-        // ПРОКСИ
         const PROXY = 'https://corsproxy.io/?';
         let useProxy = false;
 
-        // ЭЛЕМЕНТЫ DOM
+        // ===== DOM =====
         const cityInput = document.getElementById('cityInput');
         const searchBtn = document.getElementById('searchBtn');
         const gpsBtn = document.getElementById('gpsBtn');
@@ -293,8 +345,44 @@
         const errorMsgEl = document.getElementById('errorMsg');
         const forecastGrid = document.getElementById('forecastGrid');
         const hourlyGrid = document.getElementById('hourlyGrid');
+        const pressureToggle = document.getElementById('pressureToggle');
 
-        // ===== КАРТА (НАДЁЖНАЯ ВЕРСИЯ) =====
+        // ===== ПЕРЕКЛЮЧАТЕЛЬ ДАВЛЕНИЯ =====
+        let isHPa = true;
+        let lastPressureValue = 1013;
+
+        function convertPressure(value, toMM = true) {
+            if (toMM) {
+                return Math.round(value * 0.750062 * 10) / 10;
+            } else {
+                return Math.round(value / 0.750062 * 10) / 10;
+            }
+        }
+
+        function updatePressureDisplay(value) {
+            if (!pressureEl) return;
+            lastPressureValue = value;
+
+            if (isHPa) {
+                pressureEl.innerHTML = Math.round(value * 10) / 10 + ' <small>гПа</small>';
+                if (pressureToggle) pressureToggle.textContent = '↔ мм рт.ст.';
+            } else {
+                const mmValue = convertPressure(value, true);
+                pressureEl.innerHTML = mmValue + ' <small>мм рт.ст.</small>';
+                if (pressureToggle) pressureToggle.textContent = '↔ гПа';
+            }
+        }
+
+        if (pressureToggle) {
+            pressureToggle.addEventListener('click', function() {
+                isHPa = !isHPa;
+                if (lastPressureValue) {
+                    updatePressureDisplay(lastPressureValue);
+                }
+            });
+        }
+
+        // ===== КАРТА =====
         let map = null;
         let marker = null;
 
@@ -332,11 +420,18 @@
             marker.bindPopup('📍 Москва').openPopup();
         }
 
+        function setMarker(lat, lon, text) {
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([lat, lon]).addTo(map);
+            marker.bindPopup(text).openPopup();
+            map.setView([lat, lon], 12);
+        }
+
         window.addEventListener('load', function() {
             setTimeout(initMap, 300);
         });
 
-        // ===== ОСНОВНЫЕ ФУНКЦИИ =====
+        // ===== ФУНКЦИИ =====
         function capitalizeFirst(str) {
             if (!str) return '';
             return str.charAt(0).toUpperCase() + str.slice(1);
@@ -358,8 +453,16 @@
         function getWeatherEmoji(iconCode) {
             if (!iconCode) return '🌍';
             const code = iconCode.slice(0, 2);
-            const map = { '01': '☀️', '02': '⛅', '03': '☁️', '04': '☁️',
-                '09': '🌧️', '10': '🌦️', '11': '⛈️', '13': '❄️', '50': '🌫️' };
+            // ===== ЯСНО (01) — ЛУНА/СОЛНЦЕ =====
+            if (code === '01') {
+                const hours = new Date().getHours();
+                return (hours >= 20 || hours < 6) ? '🌙' : '☀️';
+            }
+            const map = {
+                '02': '⛅', '03': '☁️', '04': '☁️',
+                '09': '🌧️', '10': '🌦️', '11': '⛈️',
+                '13': '❄️', '50': '🌫️'
+            };
             return map[code] || '🌈';
         }
 
@@ -372,38 +475,32 @@
         }
 
         function updateUI(data) {
+            if (!data) return;
+
             const city = data.name || 'Неизвестно';
             const country = '';
             cityNameEl.innerHTML = `${city} <span id="countryCode">${country}</span>`;
 
             const temp = data.main?.temp;
-            if (temp !== undefined) {
-                temperatureEl.textContent = Math.round(temp * 10) / 10;
-            }
+            if (temp !== undefined) temperatureEl.textContent = Math.round(temp * 10) / 10;
 
             const feels = data.main?.feels_like;
-            if (feels !== undefined) {
-                feelsLikeEl.innerHTML = `${Math.round(feels * 10) / 10} <small>°C</small>`;
-            }
+            if (feels !== undefined) feelsLikeEl.innerHTML = Math.round(feels * 10) / 10 + ' <small>°C</small>';
 
             const humidity = data.main?.humidity;
-            if (humidity !== undefined) {
-                humidityEl.innerHTML = `${humidity} <small>%</small>`;
-            }
+            if (humidity !== undefined) humidityEl.innerHTML = humidity + ' <small>%</small>';
 
             const pressure = data.main?.pressure;
             if (pressure !== undefined) {
-                pressureEl.innerHTML = `${pressure} <small>гПа</small>`;
+                lastPressureValue = pressure;
+                updatePressureDisplay(pressure);
             }
 
             const wind = data.wind?.speed;
-            if (wind !== undefined) {
-                windSpeedEl.innerHTML = `${Math.round(wind * 10) / 10} <small>м/с</small>`;
-            }
+            if (wind !== undefined) windSpeedEl.innerHTML = Math.round(wind * 10) / 10 + ' <small>м/с</small>';
 
-            const weatherArr = data.weather;
-            if (weatherArr && weatherArr.length > 0) {
-                const w = weatherArr[0];
+            if (data.weather && data.weather[0]) {
+                const w = data.weather[0];
                 const descEn = w.description || '';
                 const descRu = translateDescription(descEn);
                 descriptionEl.textContent = capitalizeFirst(descRu) || '—';
@@ -418,14 +515,14 @@
         }
 
         function updateForecast(data) {
-            if (!data.list || data.list.length === 0) {
+            if (!data || !data.list || data.list.length === 0) {
                 forecastGrid.innerHTML = '<div style="text-align:center; opacity:0.5; grid-column:1/-1; padding:20px 0;">❌ Нет данных прогноза</div>';
                 hourlyGrid.innerHTML = '<div style="text-align:center; opacity:0.5; padding:20px 0; width:100%;">❌ Нет данных почасового прогноза</div>';
                 return;
             }
 
-            const dailyForecasts = data.list.filter((item, index) => index % 8 === 0).slice(0, 5);
-            forecastGrid.innerHTML = dailyForecasts.map(item => {
+            const daily = data.list.filter((_, i) => i % 8 === 0).slice(0, 5);
+            forecastGrid.innerHTML = daily.map(item => {
                 const temp = Math.round(item.main.temp * 10) / 10;
                 const desc = translateDescription(item.weather[0].description);
                 const icon = getWeatherEmoji(item.weather[0].icon);
@@ -440,8 +537,8 @@
                 `;
             }).join('');
 
-            const hourlyData = data.list.slice(0, 8);
-            hourlyGrid.innerHTML = hourlyData.map(item => {
+            const hourly = data.list.slice(0, 8);
+            hourlyGrid.innerHTML = hourly.map(item => {
                 const temp = Math.round(item.main.temp * 10) / 10;
                 const icon = getWeatherEmoji(item.weather[0].icon);
                 const time = formatTime(item.dt);
@@ -456,7 +553,7 @@
         }
 
         function showError(msg) {
-            errorMsgEl.textContent = `⚠️ ${msg}`;
+            errorMsgEl.textContent = '⚠️ ' + msg;
             errorMsgEl.classList.add('show');
         }
 
@@ -550,42 +647,37 @@
                 showError('Введите название города');
             }
         }
-        
+
         function getCurrentLocation() {
-    if (!navigator.geolocation) {
-        showError('Ваш браузер не поддерживает геолокацию');
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        function(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-
-            // ===== СТАВИМ БУЛАВКУ НА КАРТУ =====
-            if (map) {
-                if (marker) {
-                    map.removeLayer(marker);
-                    marker = null;
-                }
-                marker = L.marker([lat, lon]).addTo(map);
-                marker.bindPopup('📍 Ваше местоположение').openPopup();
-                map.setView([lat, lon], 14); // приближаем
+            if (!navigator.geolocation) {
+                showError('Ваш браузер не поддерживает геолокацию');
+                return;
             }
 
-            // Запрашиваем погоду для этих координат
-            fetchWeatherByCoords(lat, lon);
-        },
-        function(error) {
-            let msg = 'Не удалось определить местоположение';
-            if (error.code === 1) msg = 'Доступ к геолокации запрещен';
-            else if (error.code === 2) msg = 'Сигнал GPS недоступен';
-            else if (error.code === 3) msg = 'Время ожидания истекло';
-            showError(msg);
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-    );
-}
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    if (map) {
+                        if (marker) map.removeLayer(marker);
+                        marker = L.marker([lat, lon]).addTo(map);
+                        marker.bindPopup('📍 Ваше местоположение').openPopup();
+                        map.setView([lat, lon], 14);
+                    }
+
+                    fetchWeatherByCoords(lat, lon);
+                },
+                function(error) {
+                    let msg = 'Не удалось определить местоположение';
+                    if (error.code === 1) msg = 'Доступ к геолокации запрещен';
+                    else if (error.code === 2) msg = 'Сигнал GPS недоступен';
+                    else if (error.code === 3) msg = 'Время ожидания истекло';
+                    showError(msg);
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
 
         searchBtn.addEventListener('click', handleSearch);
         cityInput.addEventListener('keydown', (e) => {
@@ -596,6 +688,70 @@
         });
         gpsBtn.addEventListener('click', getCurrentLocation);
 
+        // ===== КЕШ И ОПТИМИЗАЦИЯ =====
+        function saveToCache(weatherData, forecastData) {
+            try {
+                const data = { weather: weatherData, forecast: forecastData, timestamp: Date.now() };
+                localStorage.setItem('ryazhenka_cache', JSON.stringify(data));
+            } catch (e) {}
+        }
+
+        function loadFromCache() {
+            try {
+                const cached = localStorage.getItem('ryazhenka_cache');
+                if (!cached) return null;
+                const data = JSON.parse(cached);
+                if (Date.now() - data.timestamp > 43200000) return null;
+                return data;
+            } catch (e) { return null; }
+        }
+
+        function fetchWeatherOptimized(city) {
+            if (!city.trim()) return;
+
+            const weatherUrl = `${BASE_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
+            const forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
+
+            Promise.all([
+                fetchWithProxy(weatherUrl, { headers: { 'Accept': 'application/json' } }),
+                fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } })
+            ])
+            .then(responses => Promise.all(responses.map(r => {
+                if (!r.ok) throw new Error(`Ошибка ${r.status}`);
+                return r.json();
+            })))
+            .then(([weatherData, forecastData]) => {
+                updateUI(weatherData);
+                updateForecast(forecastData);
+                saveToCache(weatherData, forecastData);
+                if (weatherData.coord && map) {
+                    setMarker(weatherData.coord.lat, weatherData.coord.lon, '📍 ' + weatherData.name);
+                }
+            })
+            .catch(error => {
+                console.warn('Ошибка обновления:', error.message);
+                if (!loadFromCache()) {
+                    showError('Не удалось загрузить погоду');
+                }
+            });
+        }
+
+        // ===== ЗАПУСК С КЕШЕМ =====
+        const cached = loadFromCache();
+        if (cached) {
+            updateUI(cached.weather);
+            if (cached.forecast) updateForecast(cached.forecast);
+            if (cached.weather?.coord && map) {
+                setMarker(cached.weather.coord.lat, cached.weather.coord.lon, '📍 ' + cached.weather.name);
+            }
+        }
+
+        setTimeout(() => {
+            const city = cityInput.value.trim() || 'Moscow';
+            fetchWeatherOptimized(city);
+        }, 500);
+
+        // Старый запуск на случай, если новый не сработает
         setTimeout(() => {
             const defaultCity = cityInput.value.trim() || 'Moscow';
             fetchWeather(defaultCity);
@@ -661,73 +817,6 @@
             }, 10000);
         }
     })();
-    // ===== КЕШ =====
-function saveToCache(weatherData, forecastData) {
-    try {
-        const data = { weather: weatherData, forecast: forecastData, timestamp: Date.now() };
-        localStorage.setItem('ryazhenka_cache', JSON.stringify(data));
-    } catch (e) {}
-}
-
-function loadFromCache() {
-    try {
-        const cached = localStorage.getItem('ryazhenka_cache');
-        if (!cached) return null;
-        const data = JSON.parse(cached);
-        if (Date.now() - data.timestamp > 43200000) return null; // 12 часов
-        return data;
-    } catch (e) { return null; }
-}
-
-// ===== ОПТИМИЗИРОВАННЫЙ ЗАПУСК =====
-function initApp() {
-    const cached = loadFromCache();
-    if (cached) {
-        updateUI(cached.weather);
-        if (cached.forecast) updateForecast(cached.forecast);
-        if (cached.weather?.coord) {
-            setMarker(cached.weather.coord.lat, cached.weather.coord.lon, '📍 ' + cached.weather.name);
-        }
-    }
-
-    setTimeout(() => {
-        if (!map) initMap();
-    }, 500);
-
-    const city = cityInput.value.trim() || 'Moscow';
-    fetchWeatherOptimized(city);
-}
-
-// ===== ОПТИМИЗИРОВАННЫЙ ЗАПРОС =====
-function fetchWeatherOptimized(city) {
-    if (!city.trim()) return;
-
-    const weatherUrl = `${BASE_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
-    const forecastUrl = `${FORECAST_URL}?q=${encodeURIComponent(city.trim())}&units=metric&lang=ru&appid=${API_KEY}`;
-
-    Promise.all([
-        fetchWithProxy(weatherUrl, { headers: { 'Accept': 'application/json' } }),
-        fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } })
-    ])
-    .then(responses => Promise.all(responses.map(r => {
-        if (!r.ok) throw new Error(`Ошибка ${r.status}`);
-        return r.json();
-    })))
-    .then(([weatherData, forecastData]) => {
-        updateUI(weatherData);
-        updateForecast(forecastData);
-        saveToCache(weatherData, forecastData);
-        if (weatherData.coord) {
-            setMarker(weatherData.coord.lat, weatherData.coord.lon, '📍 ' + weatherData.name);
-        }
-    })
-    .catch(error => {
-        console.warn('Ошибка обновления:', error.message);
-        if (!loadFromCache()) {
-            showError('Не удалось загрузить погоду');
-        }
-    });
-}
 </script>
 </body>
 </html>
