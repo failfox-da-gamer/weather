@@ -848,7 +848,7 @@
                 if (!data) return;
 
                 const city = data.name || 'Неизвестно';
-                const country = data.sys?.country || '';
+                const country = '';
                 cityNameEl.innerHTML =
                     `${city} <span id="countryCode">${country}</span> <span class="last-update" id="lastUpdate">🔄 обновлено сейчас</span>`;
                 updateLastUpdate();
