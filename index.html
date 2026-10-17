@@ -29,6 +29,8 @@
             display: flex;
             flex-direction: column;
             gap: 24px;
+            position: relative;
+            z-index: 1;
         }
 
         .weather-card {
@@ -587,6 +589,129 @@
             color: #f5c542;
             border: 1px solid rgba(245, 197, 66, 0.1);
         }
+
+        /* ===== ХЭЛЛОУИН ===== */
+        .halloween {
+            background: linear-gradient(145deg, #1a0a1a, #2d1b3d) !important;
+        }
+
+        .halloween .weather-card {
+            border-color: #ff8c00 !important;
+            box-shadow: 0 0 40px rgba(255, 140, 0, 0.3) !important;
+        }
+
+        .halloween .weather-card:hover {
+            box-shadow: 0 0 60px rgba(255, 140, 0, 0.5) !important;
+        }
+
+        .halloween .temp {
+            color: #ff8c00 !important;
+        }
+
+        .halloween .weather-icon {
+            animation: spooky 2s ease-in-out infinite;
+        }
+
+        @keyframes spooky {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 140, 0, 0.3)); transform: translateY(0); }
+            50% { filter: drop-shadow(0 0 25px rgba(255, 140, 0, 0.8)); transform: translateY(-5px); }
+        }
+
+        .halloween .ghost {
+            position: fixed;
+            font-size: 1.8rem;
+            pointer-events: none;
+            z-index: 9999;
+            animation: floatAround linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes floatAround {
+            0% { transform: translateX(-100px) translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(-50px) rotate(360deg); opacity: 0; }
+        }
+
+        .halloween .bat {
+            position: fixed;
+            font-size: 1.4rem;
+            pointer-events: none;
+            z-index: 9999;
+            animation: flyBat linear infinite;
+        }
+
+        @keyframes flyBat {
+            0% { transform: translateX(-50px) translateY(0) scaleX(1); opacity: 0; }
+            10% { opacity: 0.9; }
+            50% { transform: translateX(50vw) translateY(-30px) scaleX(-1); }
+            90% { opacity: 0.9; }
+            100% { transform: translateX(calc(100vw + 50px)) translateY(0) scaleX(1); opacity: 0; }
+        }
+
+        .halloween .web {
+            position: fixed;
+            font-size: 4rem;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.3;
+        }
+
+        .halloween .web.tl { top: 0; left: 0; }
+        .halloween .web.tr { top: 0; right: 0; transform: scaleX(-1); }
+        .halloween .web.bl { bottom: 0; left: 0; transform: scaleY(-1); }
+        .halloween .web.br { bottom: 0; right: 0; transform: scale(-1); }
+
+        .halloween #loading {
+            font-size: 3rem;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== ЗИМНЯЯ ТЕМА (1 дек – 28/29 фев) ===== */
+        .winter {
+            background: linear-gradient(145deg, #0a2f1f, #1a4a2a) !important;
+        }
+
+        .winter .weather-card {
+            border-color: #8ab4d6 !important;
+            box-shadow: 0 0 40px rgba(138, 180, 214, 0.2) !important;
+        }
+
+        .winter .temp {
+            color: #b3d9ff !important;
+        }
+
+        .winter .snowflake {
+            position: fixed;
+            top: -10px;
+            color: #fff;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            pointer-events: none;
+            animation: fall linear infinite;
+            z-index: 9999;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 0.8; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0.2; }
+        }
+
+        .winter .holiday-badge {
+            background: rgba(138, 180, 214, 0.2);
+            border: 1px solid #8ab4d6;
+            border-radius: 40px;
+            padding: 0.3rem 1.2rem;
+            font-size: 0.8rem;
+            color: #b3d9ff;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -667,18 +792,19 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         (function() {
             "use strict";
 
+            // ===== КОНФИГ =====
             const API_KEY = '980ea6c12983c9ea25ad6919168044c0';
             const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
             const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
             const PROXY = 'https://corsproxy.io/?';
             let useProxy = false;
 
+            // ===== DOM =====
             const cityInput = document.getElementById('cityInput');
             const searchBtn = document.getElementById('searchBtn');
             const gpsBtn = document.getElementById('gpsBtn');
@@ -697,6 +823,7 @@
             const pressureToggle = document.getElementById('pressureToggle');
             const lastUpdateEl = document.getElementById('lastUpdate');
 
+            // ===== ДАВЛЕНИЕ =====
             let isHPa = true;
             let lastPressureValue = 1013;
 
@@ -730,6 +857,7 @@
                 });
             }
 
+            // ===== КАРТА =====
             let map = null;
             let marker = null;
 
@@ -774,6 +902,7 @@
                 setTimeout(initMap, 300);
             });
 
+            // ===== ВСПОМОГАТЕЛЬНЫЕ =====
             function capitalizeFirst(str) {
                 if (!str) return '';
                 return str.charAt(0).toUpperCase() + str.slice(1);
@@ -844,6 +973,7 @@
                 lastUpdateEl.textContent = '🔄 ' + now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             }
 
+            // ===== UI =====
             function updateUI(data) {
                 if (!data) return;
 
@@ -951,6 +1081,7 @@
                     '<div style="text-align:center; opacity:0.5; padding:20px 0; width:100%;">⏳ Загрузка...</div>';
             }
 
+            // ===== ЗАПРОСЫ =====
             function fetchWithProxy(url) {
                 return useProxy ? fetch(PROXY + url) : fetch(url);
             }
@@ -1024,6 +1155,7 @@
                 });
             }
 
+            // ===== КЕШ =====
             function saveToCache(weatherData, forecastData) {
                 try {
                     const data = { weather: weatherData, forecast: forecastData, timestamp: Date.now() };
@@ -1041,6 +1173,7 @@
                 } catch (e) { return null; }
             }
 
+            // ===== ОБРАБОТЧИКИ =====
             function handleSearch() {
                 const city = cityInput.value.trim();
                 if (city) {
@@ -1089,6 +1222,7 @@
             });
             gpsBtn.addEventListener('click', getCurrentLocation);
 
+            // ===== ИНИЦИАЛИЗАЦИЯ =====
             const cached = loadFromCache();
             if (cached) {
                 updateUI(cached.weather);
@@ -1110,6 +1244,7 @@
                 }
             }, 1500);
 
+            // ===== ПАСХАЛКА: ЗЕМЛЕТРЯСЕНИЕ =====
             let earthTaps = 0;
             let isEarthquake = false;
             const earthEmoji = document.getElementById('weatherIcon');
@@ -1167,6 +1302,120 @@
                 setInterval(() => {
                     earthTaps = 0;
                 }, 12000);
+            }
+
+            // ===== ХЭЛЛОУИН (1 октября – 7 ноября) =====
+            function isHalloween() {
+                const now = new Date();
+                const month = now.getMonth() + 1;
+                const day = now.getDate();
+
+                // Октябрь: с 1 по 31
+                if (month === 10 && day >= 1) return true;
+                // Ноябрь: с 1 по 7
+                if (month === 11 && day <= 7) return true;
+
+                return false;
+            }
+
+            if (isHalloween()) {
+                document.body.classList.add('halloween');
+
+                // Призраки 👻
+                function createGhost() {
+                    const ghost = document.createElement('div');
+                    ghost.classList.add('ghost');
+                    ghost.textContent = '👻';
+                    ghost.style.top = Math.random() * 80 + 10 + '%';
+                    ghost.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                    ghost.style.fontSize = (Math.random() * 1.5 + 1.2) + 'rem';
+                    document.body.appendChild(ghost);
+                    setTimeout(() => ghost.remove(), 18000);
+                }
+                setInterval(createGhost, 3000);
+
+                // Летучие мыши 🦇
+                function createBat() {
+                    const bat = document.createElement('div');
+                    bat.classList.add('bat');
+                    bat.textContent = '🦇';
+                    bat.style.top = Math.random() * 70 + 10 + '%';
+                    bat.style.animationDuration = (Math.random() * 6 + 5) + 's';
+                    document.body.appendChild(bat);
+                    setTimeout(() => bat.remove(), 12000);
+                }
+                setInterval(createBat, 4000);
+
+                // Паутина по углам 🕸️
+                const corners = ['tl', 'tr', 'bl', 'br'];
+                corners.forEach(corner => {
+                    const web = document.createElement('div');
+                    web.classList.add('web', corner);
+                    web.textContent = '🕸️';
+                    document.body.appendChild(web);
+                });
+
+                // Меняем заголовок прогноза
+                const forecastTitle = document.querySelector('.forecast-title');
+                if (forecastTitle) {
+                    forecastTitle.innerHTML = '🎃 Жуткий прогноз <span class="mini-badge">🦇 ХЭЛЛОУИН!</span>';
+                }
+
+                // Меняем футер
+                const footer = document.querySelector('.footer-note');
+                if (footer) {
+                    footer.textContent = '🎃 С Хэллоуином! Берегись призраков! 👻';
+                }
+
+                console.log('🎃 Хэллоуин-режим активирован! (1 октября – 7 ноября)');
+            }
+
+            // ===== ЗИМНЯЯ ТЕМА (1 дек – 28/29 фев) =====
+            function isWinter() {
+                const now = new Date();
+                const month = now.getMonth() + 1;
+                const day = now.getDate();
+                const year = now.getFullYear();
+
+                if (month === 12 && day >= 1) return true;
+                if (month === 1) return true;
+                if (month === 2) {
+                    const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+                    if (day <= (isLeap ? 29 : 28)) return true;
+                }
+                return false;
+            }
+
+            if (isWinter() && !isHalloween()) {
+                document.body.classList.add('winter');
+
+                // Снегопад ❄️
+                function createSnowflake() {
+                    const snowflake = document.createElement('div');
+                    snowflake.classList.add('snowflake');
+                    snowflake.textContent = '❄️';
+                    snowflake.style.left = Math.random() * 100 + '%';
+                    snowflake.style.fontSize = (Math.random() * 1.5 + 0.5) + 'rem';
+                    snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                    snowflake.style.opacity = Math.random() * 0.5 + 0.5;
+                    document.body.appendChild(snowflake);
+                    setTimeout(() => snowflake.remove(), 10000);
+                }
+                setInterval(createSnowflake, 200);
+
+                // Меняем заголовок прогноза
+                const forecastTitle = document.querySelector('.forecast-title');
+                if (forecastTitle) {
+                    forecastTitle.innerHTML = '❄️ Зимний прогноз <span class="mini-badge">⛄️ СНЕЖНО!</span>';
+                }
+
+                // Меняем футер
+                const footer = document.querySelector('.footer-note');
+                if (footer) {
+                    footer.textContent = '❄️ Замороженное кислое молоко с мандаринами! 🍊';
+                }
+
+                console.log('❄️ Зимний режим активирован!');
             }
 
             console.log('🌤️ Ряженка — погода с душой');
