@@ -1,3 +1,18 @@
+Нет, вы немного ошиблись, и из-за этого код сломался (пропала закрывающая кавычка).
+
+Вот ошибка, которую вы допустили (в функции clearWeatherData):
+
+```javascript
+cityNameEl.innerHTML = 'Город ; // <--- ВОТ ТУТ СИНТАКСИЧЕСКАЯ ОШИБКА (не закрыта кавычка)
+```
+
+А также в самом начале вы не удалили id="countryCode" из HTML, и в функции updateUI оставили вывод страны. Из-за этого код либо не работает вообще, либо всё равно показывает страну.
+
+Я всё исправил за вас. Я убрал страну из HTML-разметки, из функции обновления и заодно починил ту сломанную строчку.
+
+Просто полностью скопируйте этот код и замените им ваш файл:
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -743,7 +758,7 @@
             <div class="search-hint">✏️ Введите город или коснитесь карты</div>
 
             <div class="city-name" id="cityName">
-                Москва <span id="countryCode">RU</span>
+                Москва
                 <span class="last-update" id="lastUpdate">🔄 обновлено сейчас</span>
             </div>
 
@@ -1002,9 +1017,8 @@
                 if (!data) return;
 
                 const city = data.name || 'Неизвестно';
-                const country = data.sys?.country || '';
-                cityNameEl.innerHTML =
-                    `${city} <span id="countryCode">${country}</span> <span class="last-update" id="lastUpdate">🔄 обновлено сейчас</span>`;
+                // Страна убрана из вывода
+                cityNameEl.innerHTML = `${city} <span class="last-update" id="lastUpdate">🔄 обновлено сейчас</span>`;
                 updateLastUpdate();
 
                 const temp = data.main?.temp;
@@ -1098,7 +1112,8 @@
                 windSpeedEl.innerHTML = '-- <small>м/с</small>';
                 descriptionEl.innerHTML = '— <span class="extra-badge">⏳ загрузка</span>';
                 weatherIconEl.textContent = '🌍';
-                cityNameEl.innerHTML = 'Город <span id="countryCode"></span> <span class="last-update"></span>';
+                // ИСПРАВЛЕНА ОШИБКА (незакрытая кавычка)
+                cityNameEl.innerHTML = 'Город <span class="last-update"></span>'; 
                 forecastGrid.innerHTML =
                     '<div style="text-align:center; opacity:0.5; grid-column:1/-1; padding:20px 0;">⏳ Загрузка прогноза...</div>';
                 hourlyGrid.innerHTML =
