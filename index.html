@@ -304,7 +304,9 @@
         }
 
         /* ===== УБИРАЕМ ФЛАГИ В АТРИБУЦИИ ===== */
-        .leaflet-control-attribution .leaflet-attribution-flag {
+        .leaflet-control-attribution img,
+        .leaflet-control-attribution svg,
+        .leaflet-attribution-flag {
             display: none !important;
         }
 
@@ -321,6 +323,11 @@
 
         .leaflet-control-attribution a {
             color: #8ab4d6 !important;
+            text-decoration: none;
+        }
+
+        .leaflet-control-attribution a:hover {
+            text-decoration: underline;
         }
 
         .forecast-title {
@@ -590,7 +597,6 @@
             border: 1px solid rgba(245, 197, 66, 0.1);
         }
 
-        /* ===== ХЭЛЛОУИН ===== */
         .halloween {
             background: linear-gradient(145deg, #1a0a1a, #2d1b3d) !important;
         }
@@ -672,7 +678,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* ===== ЗИМНЯЯ ТЕМА (1 дек – 28/29 фев) ===== */
         .winter {
             background: linear-gradient(145deg, #0a2f1f, #1a4a2a) !important;
         }
@@ -801,8 +806,16 @@
             const API_KEY = '980ea6c12983c9ea25ad6919168044c0';
             const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
             const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
-            const PROXY = 'https://corsproxy.io/?';
-            let useProxy = false;
+
+            // Резервные CORS-прокси. Переключаемся на следующий при сбое.
+            // Первый — прямой запрос (без прокси), затем прокси.
+            const CORS_PROXIES = [
+                '', // прямой запрос
+                'https://api.allorigins.win/raw?url=',       // рабочий публичный прокси
+                'https://corsproxy.io/?url=',                // новый формат corsproxy.io
+                'https://cors.lol/?url='                     // ещё один резервный
+            ];
+            let proxyIndex = 0;
 
             // ===== DOM =====
             const cityInput = document.getElementById('cityInput');
@@ -872,7 +885,7 @@
                 });
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
                 }).addTo(map);
 
                 map.on('click', function(e) {
@@ -892,6 +905,7 @@
             }
 
             function setMarker(lat, lon, text) {
+                if (!map) return;
                 if (marker) map.removeLayer(marker);
                 marker = L.marker([lat, lon]).addTo(map);
                 marker.bindPopup(text).openPopup();
@@ -917,8 +931,12 @@
                     'overcast clouds': 'пасмурно',
                     'shower rain': 'ливень',
                     'rain': 'дождь',
+                    'light rain': 'небольшой дождь',
+                    'moderate rain': 'умеренный дождь',
+                    'heavy intensity rain': 'сильный дождь',
                     'thunderstorm': 'гроза',
                     'snow': 'снег',
+                    'light snow': 'небольшой снег',
                     'mist': 'туман',
                     'smoke': 'дымка',
                     'haze': 'мгла',
@@ -978,7 +996,7 @@
                 if (!data) return;
 
                 const city = data.name || 'Неизвестно';
-                const country = '';
+                const country = data.sys?.country || '';
                 cityNameEl.innerHTML =
                     `${city} <span id="countryCode">${country}</span> <span class="last-update" id="lastUpdate">🔄 обновлено сейчас</span>`;
                 updateLastUpdate();
@@ -1010,7 +1028,7 @@
                     const iconCode = w.icon || '';
                     weatherIconEl.textContent = getWeatherEmoji(iconCode);
                 } else {
-                    descriptionEl.innerHTML = '— <span class="extra-badge">${getDayPeriod()}</span>';
+                    descriptionEl.innerHTML = `— <span class="extra-badge">${getDayPeriod()}</span>`;
                     weatherIconEl.textContent = '🌍';
                 }
 
@@ -1081,29 +1099,82 @@
                     '<div style="text-align:center; opacity:0.5; padding:20px 0; width:100%;">⏳ Загрузка...</div>';
             }
 
-            // ===== ЗАПРОСЫ =====
-            function fetchWithProxy(url) {
-                return useProxy ? fetch(PROXY + url) : fetch(url);
+            // ===== ЗАПРОСЫ (С АВТОПЕРЕКЛЮЧЕНИЕМ ПРОКСИ) =====
+            function buildUrl(url) {
+                const proxy = CORS_PROXIES[proxyIndex];
+                if (!proxy) return url;
+                return proxy + encodeURIComponent(url);
+            }
+
+            // Универсальный fetch с перебором прокси
+            function fetchJSON(url) {
+                return new Promise(function(resolve, reject) {
+                    let attempts = 0;
+
+                    function tryNext() {
+                        if (attempts >= CORS_PROXIES.length) {
+                            reject(new Error('Все прокси недоступны'));
+                            return;
+                        }
+
+                        const currentUrl = buildUrl(url);
+                        const isDirect = (proxyIndex === 0);
+
+                        fetch(currentUrl, {
+                            headers: { 'Accept': 'application/json' },
+                            mode: 'cors'
+                        })
+                        .then(function(r) {
+                            if (!r.ok) {
+                                throw new Error('HTTP ' + r.status);
+                            }
+                            return r.json();
+                        })
+                        .then(function(data) {
+                            if (data && data.cod && data.cod !== 200 && data.cod !== '200') {
+                                // Ошибка от самого API (например, 404 город не найден)
+                                const apiErr = new Error('API: ' + (data.message || 'неизвестная ошибка'));
+                                apiErr.apiResponse = data;
+                                throw apiErr;
+                            }
+                            resolve(data);
+                        })
+                        .catch(function(err) {
+                            // Если это ответ API с ошибкой (город не найден) — не переключаем прокси, а сообщаем
+                            if (err.apiResponse) {
+                                reject(err);
+                                return;
+                            }
+                            console.warn('[Прокси ' + (isDirect ? 'прямой' : proxyIndex) + '] не сработал: ' + err.message);
+                            attempts++;
+                            proxyIndex = (proxyIndex + 1) % CORS_PROXIES.length;
+                            tryNext();
+                        });
+                    }
+
+                    tryNext();
+                });
             }
 
             function fetchWeatherByCoords(lat, lon) {
-                const url = `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
-                fetchWithProxy(url, { headers: { 'Accept': 'application/json' } })
-                    .then(r => {
-                        if (!r.ok) throw new Error('Ошибка ' + r.status);
-                        return r.json();
+                const weatherUrl =
+                    `${BASE_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+                const forecastUrl =
+                    `${FORECAST_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
+
+                Promise.all([fetchJSON(weatherUrl), fetchJSON(forecastUrl)])
+                    .then(function(results) {
+                        updateUI(results[0]);
+                        updateForecast(results[1]);
+                        saveToCache(results[0], results[1]);
+                        if (results[0].coord) {
+                            setMarker(results[0].coord.lat, results[0].coord.lon, '📍 ' + results[0].name);
+                        }
                     })
-                    .then(data => {
-                        updateUI(data);
-                        const forecastUrl =
-                            `${FORECAST_URL}?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
-                        return fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } });
-                    })
-                    .then(r => r.json())
-                    .then(forecastData => updateForecast(forecastData))
-                    .catch(err => {
-                        console.warn('Ошибка по координатам:', err);
+                    .catch(function(err) {
+                        console.warn('Ошибка по координатам:', err.message);
                         showError('Не удалось получить погоду для этой точки');
+                        clearWeatherData();
                     });
             }
 
@@ -1121,38 +1192,24 @@
 
                 hideError();
 
-                Promise.all([
-                    fetchWithProxy(weatherUrl, { headers: { 'Accept': 'application/json' } }),
-                    fetchWithProxy(forecastUrl, { headers: { 'Accept': 'application/json' } })
-                ])
-                .then(responses => Promise.all(responses.map(r => {
-                    if (!r.ok) {
-                        if (r.status === 404) throw new Error('Город не найден');
-                        if (r.status === 401) throw new Error('Ошибка API: проверьте ключ');
-                        throw new Error(`Ошибка ${r.status}`);
-                    }
-                    return r.json();
-                })))
-                .then(([weatherData, forecastData]) => {
-                    updateUI(weatherData);
-                    updateForecast(forecastData);
-                    saveToCache(weatherData, forecastData);
-                    if (weatherData.coord && map) {
-                        setMarker(weatherData.coord.lat, weatherData.coord.lon, '📍 ' + weatherData.name);
-                    }
-                })
-                .catch(error => {
-                    console.warn('Ошибка запроса:', error.message);
-                    if (!useProxy && (error.message.includes('Failed to fetch') || error.message.includes(
-                            'NetworkError'))) {
-                        useProxy = true;
-                        console.log('🔄 Включаем прокси и повторяем запрос...');
-                        fetchWeather(city);
-                        return;
-                    }
-                    showError('Не удалось найти город. Проверьте название.');
-                    clearWeatherData();
-                });
+                Promise.all([fetchJSON(weatherUrl), fetchJSON(forecastUrl)])
+                    .then(function(results) {
+                        updateUI(results[0]);
+                        updateForecast(results[1]);
+                        saveToCache(results[0], results[1]);
+                        if (results[0].coord) {
+                            setMarker(results[0].coord.lat, results[0].coord.lon, '📍 ' + results[0].name);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.warn('Ошибка запроса:', error.message);
+                        if (error.apiResponse && error.apiResponse.cod === '404') {
+                            showError('Город не найден. Проверьте название.');
+                        } else {
+                            showError('Не удалось загрузить погоду. Попробуйте позже.');
+                        }
+                        clearWeatherData();
+                    });
             }
 
             // ===== КЕШ =====
@@ -1227,22 +1284,12 @@
             if (cached) {
                 updateUI(cached.weather);
                 if (cached.forecast) updateForecast(cached.forecast);
-                if (cached.weather?.coord && map) {
-                    setMarker(cached.weather.coord.lat, cached.weather.coord.lon, '📍 ' + cached.weather.name);
-                }
             }
 
             setTimeout(() => {
                 const city = cityInput.value.trim() || 'Moscow';
                 fetchWeather(city);
             }, 600);
-
-            setTimeout(() => {
-                const city = cityInput.value.trim() || 'Moscow';
-                if (document.getElementById('temperature').textContent === '--') {
-                    fetchWeather(city);
-                }
-            }, 1500);
 
             // ===== ПАСХАЛКА: ЗЕМЛЕТРЯСЕНИЕ =====
             let earthTaps = 0;
@@ -1310,9 +1357,7 @@
                 const month = now.getMonth() + 1;
                 const day = now.getDate();
 
-                // Октябрь: с 1 по 31
                 if (month === 10 && day >= 1) return true;
-                // Ноябрь: с 1 по 7
                 if (month === 11 && day <= 7) return true;
 
                 return false;
@@ -1321,7 +1366,6 @@
             if (isHalloween()) {
                 document.body.classList.add('halloween');
 
-                // Призраки 👻
                 function createGhost() {
                     const ghost = document.createElement('div');
                     ghost.classList.add('ghost');
@@ -1334,7 +1378,6 @@
                 }
                 setInterval(createGhost, 3000);
 
-                // Летучие мыши 🦇
                 function createBat() {
                     const bat = document.createElement('div');
                     bat.classList.add('bat');
@@ -1346,7 +1389,6 @@
                 }
                 setInterval(createBat, 4000);
 
-                // Паутина по углам 🕸️
                 const corners = ['tl', 'tr', 'bl', 'br'];
                 corners.forEach(corner => {
                     const web = document.createElement('div');
@@ -1355,13 +1397,11 @@
                     document.body.appendChild(web);
                 });
 
-                // Меняем заголовок прогноза
                 const forecastTitle = document.querySelector('.forecast-title');
                 if (forecastTitle) {
                     forecastTitle.innerHTML = '🎃 Жуткий прогноз <span class="mini-badge">🦇 ХЭЛЛОУИН!</span>';
                 }
 
-                // Меняем футер
                 const footer = document.querySelector('.footer-note');
                 if (footer) {
                     footer.textContent = '🎃 С Хэллоуином! Берегись призраков! 👻';
@@ -1389,7 +1429,6 @@
             if (isWinter() && !isHalloween()) {
                 document.body.classList.add('winter');
 
-                // Снегопад ❄️
                 function createSnowflake() {
                     const snowflake = document.createElement('div');
                     snowflake.classList.add('snowflake');
@@ -1403,13 +1442,11 @@
                 }
                 setInterval(createSnowflake, 200);
 
-                // Меняем заголовок прогноза
                 const forecastTitle = document.querySelector('.forecast-title');
                 if (forecastTitle) {
                     forecastTitle.innerHTML = '❄️ Зимний прогноз <span class="mini-badge">⛄️ СНЕЖНО!</span>';
                 }
 
-                // Меняем футер
                 const footer = document.querySelector('.footer-note');
                 if (footer) {
                     footer.textContent = '❄️ Замороженное кислое молоко с мандаринами! 🍊';
